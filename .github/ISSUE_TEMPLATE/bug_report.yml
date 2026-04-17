@@ -1,0 +1,56 @@
+name: Bug Report
+description: Report a bug to help improve BarStripeLab
+title: "[BUG] "
+labels: ["bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please provide details below.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Clear description of the bug
+      placeholder: What happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How to reproduce the issue
+      placeholder: |
+        1. Go to...
+        2. Enter...
+        3. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should happen instead
+      placeholder: The barcode should...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Device and browser info
+      placeholder: |
+        - Browser: Chrome 120
+        - Device: MacBook M1
+        - OS: macOS 14.2
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other info that might help

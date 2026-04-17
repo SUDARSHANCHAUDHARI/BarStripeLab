@@ -1,0 +1,31 @@
+{
+  "name": "barstripelab",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "export": "BASE_PATH=/barstripelab next build",
+    "deploy:gh": "pnpm export && touch out/.nojekyll && gh-pages -d out"
+  },
+  "dependencies": {
+    "bwip-js": "^4.3.0",
+    "html-to-image": "^1.11.11",
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "autoprefixer": "^10.4.16",
+    "gh-pages": "^6.1.1",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3"
+  }
+}

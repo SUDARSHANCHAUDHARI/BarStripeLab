@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Background -->
+  <rect width="256" height="256" fill="#3b82f6"/>
+  
+  <!-- Barcode bars -->
+  <rect x="40" y="80" width="8" height="96" fill="white"/>
+  <rect x="56" y="80" width="4" height="96" fill="white"/>
+  <rect x="68" y="80" width="12" height="96" fill="white"/>
+  <rect x="88" y="80" width="6" height="96" fill="white"/>
+  <rect x="102" y="80" width="10" height="96" fill="white"/>
+  <rect x="120" y="80" width="8" height="96" fill="white"/>
+  <rect x="136" y="80" width="4" height="96" fill="white"/>
+  <rect x="148" y="80" width="12" height="96" fill="white"/>
+  <rect x="168" y="80" width="6" height="96" fill="white"/>
+  <rect x="182" y="80" width="10" height="96" fill="white"/>
+  <rect x="200" y="80" width="8" height="96" fill="white"/>
+  
+  <!-- Art overlay (triangles) -->
+  <polygon points="40,80 44,60 48,80" fill="#ff6b35"/>
+  <polygon points="68,80 74,50 80,80" fill="#ff6b35"/>
+  <polygon points="102,80 107,55 112,80" fill="#ff6b35"/>
+  <polygon points="148,80 156,45 164,80" fill="#ff6b35"/>
+  <polygon points="182,80 187,60 192,80" fill="#ff6b35"/>
+</svg>
