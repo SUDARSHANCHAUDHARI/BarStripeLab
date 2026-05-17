@@ -41,3 +41,6 @@ lerna-debug.log*
 # OS files
 .DS_Store
 PLAN.md
+
+# graphify knowledge graph
+graphify-out/
