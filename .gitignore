@@ -8,6 +8,7 @@
 /out/
 /build
 /coverage
+tsconfig.tsbuildinfo
 
 # environment and local config
 .env
