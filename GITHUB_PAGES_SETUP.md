@@ -14,7 +14,7 @@
 ### Step 2: Push Code
 
 ```bash
-cd ~/SUDARSHAN_CODE/sudarshan_repos/BarStripeLab
+cd /path/to/BarStripeLab
 
 git init
 git add .
