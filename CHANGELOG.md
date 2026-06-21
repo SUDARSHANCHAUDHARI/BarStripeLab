@@ -46,8 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - This changelog
 
 ### Deployment
-- Vercel ready
-- Netlify ready
+- GitHub Pages ready (via `pnpm deploy:gh`)
+- Self-hostable on any Node-capable host
 - Docker support
 
 ## [Planned Features]

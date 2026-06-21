@@ -58,60 +58,31 @@ touch out/.nojekyll
 pnpm deploy:gh
 ```
 
-## Deploy to Vercel (Recommended for Production)
+## Deploy to your own domain (Recommended)
 
-### Option 1: Web Dashboard
-1. Go to https://vercel.com
-2. Click "Import Project"
-3. Select your GitHub repo
-4. Click "Deploy"
-5. Done ✅
+BarStripeLab is fully client-side after static export — drop the `out/` directory
+on any web host you already run. No platform lock-in, no env vars, no backend.
 
-### Option 2: Vercel CLI
+### Option 1: Use the wired-up GitHub Pages flow
+
 ```bash
-pnpm add -g vercel
-vercel
-# Follow prompts
+pnpm deploy:gh
 ```
 
-### Environment Variables (if needed)
-Settings → Environment Variables → Add as needed
+That runs the static export and publishes `out/` via `gh-pages`. Point a custom
+DNS record at the Pages site for `barstripelab.your-domain.com`.
 
-## Deploy to Netlify
+### Option 2: Your VPS / static host
 
-### Option 1: Web Dashboard
-1. Go to https://netlify.com
-2. Click "New site from Git"
-3. Select your GitHub repo
-4. Build command: `npm run build`
-5. Publish directory: `.next`
-6. Deploy
-
-### Option 2: CLI
 ```bash
-npm i -g netlify-cli
-netlify deploy
+pnpm export                  # builds out/
+rsync -avz out/ user@host:/var/www/barstripelab/
 ```
 
-## Deploy to Other Platforms
+Serve `out/` with nginx / caddy / Apache. SPA fallback isn't required (Next
+static export emits per-route HTML).
 
-### AWS Amplify
-```bash
-amplify init
-amplify hosting add
-amplify publish
-```
-
-### Azure Static Web Apps
-```bash
-az staticwebapp create \
-  --resource-group <group> \
-  --name barstripelab \
-  --source https://github.com/yourname/barstripelab \
-  --branch main
-```
-
-### Self-Hosted (Docker)
+### Option 3: Self-Hosted (Docker)
 
 ```dockerfile
 FROM node:18-alpine
@@ -140,15 +111,9 @@ CMD ["npm", "start"]
 
 ## Custom Domain (Optional)
 
-### Vercel
-1. Go to Project Settings
-2. Domains → Add Domain
-3. Update DNS records
-
-### Netlify
-1. Site settings → Domain management
-2. Add custom domain
-3. Update DNS records
+Already on your own domain — point a DNS record (A / CNAME) at the host you
+deployed to. If using GitHub Pages, add a `CNAME` file inside `out/` (or set the
+custom domain in repo Settings → Pages) before running `pnpm deploy:gh`.
 
 ## Performance Optimization
 
@@ -174,24 +139,16 @@ Monitor:
    ```
 4. Restart dev server
 
-### Add Vercel Analytics
+### Add Plausible / Umami / your own analytics
 
-```bash
-pnpm add @vercel/analytics
+Use a self-hosted or privacy-friendly analytics provider that fits your stack.
+Plausible and Umami both ship a simple script tag you can drop into
+`app/layout.tsx`:
+
+```tsx
+// app/layout.tsx
+<script defer data-domain="barstripelab.your-domain.com" src="https://analytics.your-domain.com/script.js" />
 ```
-
-In `app/page.tsx`:
-```typescript
-import { Analytics } from "@vercel/analytics/react";
-
-export default function Page() {
-  return (
-    <>
-      {/* content */}
-      <Analytics />
-    </>
-  );
-}
 ```
 
 ## Troubleshooting Deployment
@@ -247,10 +204,10 @@ If needing more:
 
 ## Quick Links
 
-- [Vercel Docs](https://vercel.com/docs)
-- [Next.js Deploy](https://nextjs.org/docs/deployment)
-- [Netlify Docs](https://docs.netlify.com)
+- [Next.js Static Export](https://nextjs.org/docs/app/building-your-application/deploying/static-exports)
 - [GitHub Pages](https://pages.github.com)
+- [gh-pages package (used by `pnpm deploy:gh`)](https://github.com/tschaub/gh-pages)
+- [Plausible self-hosting](https://plausible.io/docs/self-hosting)
 
 ---
 
