@@ -11,7 +11,7 @@ A web application that transforms ordinary barcodes into creative brand assets w
 - **Styling**: Tailwind CSS
 - **Barcode Engine**: bwip-js
 - **Export**: html-to-image
-- **Deployment**: Vercel / Netlify
+- **Deployment**: Self-hosted on your own domain (GitHub Pages via `pnpm deploy:gh`, or any static host)
 
 ### Core Algorithm
 
@@ -282,11 +282,10 @@ const [error, setError] = useState("")          // Error message
 
 ## 🚀 Deployment Targets
 
-- **Vercel**: Recommended (zero config, auto-deploy)
-- **Netlify**: Good alternative
-- **AWS Amplify**: For enterprise
+- **Your own domain**: Recommended. App is fully client-side — `pnpm build` produces static output deployable anywhere.
+- **GitHub Pages**: Already wired up via `pnpm deploy:gh` (uses `gh-pages` to publish `out/`)
 - **Self-hosted**: Docker ready
-- **GitHub Pages**: Not recommended (no backend)
+- **Any static host**: Cloudflare Pages, S3+CloudFront, plain nginx — all work
 
 ## 📚 Dependencies Explained
 
@@ -361,4 +360,4 @@ MIT License - free for personal and commercial use
 
 **Last Updated**: April 2026
 **Status**: Ready for Production ✅
-**Next Action**: Deploy to Vercel + Launch
+**Next Action**: Deploy to your own domain (GitHub Pages via `pnpm deploy:gh` is wired up) + Launch

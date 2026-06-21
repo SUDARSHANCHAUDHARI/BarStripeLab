@@ -35,3 +35,49 @@
 ## Deployment
 
 Not yet deployed. `pnpm deploy:gh` is wired up for **GitHub Pages** (uses `gh-pages` to publish `out/`).
+
+## File-by-file checklist
+
+### App shell
+- [x] `app/layout.tsx`, `app/page.tsx`, `app/globals.css`, `app/error.tsx` — full editor UI
+
+### Components (`app/components/`)
+- [x] `BarcodeCanvas.tsx` — barcode render surface (uses `<img>` — flagged as lint warning)
+- [x] `Controls.tsx` — primary editor controls
+- [x] `DownloadButton.tsx` — PNG / SVG export
+- [x] `ColorPanel.tsx` — color picker + presets
+- [x] `TemplateSelector.tsx` — style template chooser
+- [x] `ShareButton.tsx` — share link
+- [x] `AIInput.tsx` — AI style prompt input
+- [x] `KeyboardShortcutsInfo.tsx` — shortcuts panel
+
+### Lib
+- [x] `lib/barcode.ts` — bwip-js wrapper
+- [x] `lib/ean13checksum.ts` — EAN-13 / EAN-8 / CODE128 checksum logic (verified against Wikipedia vectors)
+- [x] `lib/colorEngine.ts`, `lib/colorPresets.ts` — color handling
+- [x] `lib/styles.ts`, `lib/styleEngine.ts` — style application
+- [x] `lib/templates.ts` — style templates
+- [x] `lib/artEngine.ts` — composition engine
+- [x] `lib/svgComposer.ts` — SVG assembly
+- [x] `lib/shapeRenderer.tsx` — shape primitives
+- [x] `lib/columnMapper.ts` — column mapping
+- [x] `lib/aiStyleGenerator.ts` — AI style integration
+- [x] `lib/useKeyboardShortcuts.ts` — keyboard hooks
+
+### Types
+- [x] `types/index.ts`
+
+### Tests
+- [x] `lib/ean13checksum.test.ts` — 15 tests
+
+### Quality + scaffolding
+- [x] ESLint configured (0 errors, 2 pre-existing warnings)
+- [x] `typecheck` + `test` scripts
+- [x] Build + lint + typecheck green
+- [x] `pnpm deploy:gh` wired for GitHub Pages static export
+
+### Not done (small)
+- [ ] Fix `<img>` → `next/image` in `BarcodeCanvas.tsx` (lint warning)
+- [ ] Fix missing `useEffect` dep in `app/page.tsx:128` (lint warning)
+- [ ] Tests for style / art / color engines (currently only EAN checksum module is unit-tested)
+- [ ] Live deploy via `pnpm deploy:gh` (zero env vars needed)

@@ -34,19 +34,17 @@ pnpm start
 
 Test: http://localhost:3000
 
-## 5️⃣ Deploy to Vercel (5 minutes)
+## 5️⃣ Deploy to your own domain (5 minutes)
 
 ```bash
-pnpm add -g vercel
-vercel
+pnpm deploy:gh
 ```
 
-Follow prompts → Done! 🚀
+That runs the static export and publishes `out/` to GitHub Pages via `gh-pages`. For other hosts (your VPS, Cloudflare Pages, S3, etc.) just take the `out/` directory after `pnpm export` and serve it.
 
 ## 6️⃣ Share Your Link
 
-Your app is now live at:
-`https://barstripelab-xxxxx.vercel.app`
+Your app is now live on your own domain — point a DNS record at your host.
 
 ---
 
