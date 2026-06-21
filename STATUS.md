@@ -81,3 +81,26 @@ Not yet deployed. `pnpm deploy:gh` is wired up for **GitHub Pages** (uses `gh-pa
 - [ ] Fix missing `useEffect` dep in `app/page.tsx:128` (lint warning)
 - [ ] Tests for style / art / color engines (currently only EAN checksum module is unit-tested)
 - [ ] Live deploy via `pnpm deploy:gh` (zero env vars needed)
+
+## Categorized work remaining
+
+| Item | Effort | Bucket | Blocker | Priority |
+|------|--------|--------|---------|----------|
+| Fix `<img>` → `next/image` in `BarcodeCanvas.tsx` | ~30m | 🟦 Pure code | none | P3 |
+| Fix missing `useEffect` dep at `app/page.tsx:128` | ~15m | 🟦 Pure code | none | P3 |
+| Add tests for `styleEngine`, `colorEngine`, `artEngine` | ~3h | 🟦 Pure code | none | P2 |
+| Deploy to your domain via `pnpm deploy:gh` | ~15m | 🔑 Needs hosting | GitHub Pages already in place; or use static output for your host | P1 |
+
+## Release plan
+
+1. **Polish:** address the 2 lint warnings and add the engine tests (each warning is one-line; tests are bounded).
+2. **Deploy:**
+   - Easy path: `pnpm deploy:gh` publishes the static export to GitHub Pages
+   - Custom domain: add a `CNAME` file inside `out/` (or set in repo Settings → Pages) before deploy
+   - Custom host: `pnpm export` then `rsync out/ user@host:/path/`
+3. **Tag release:** `gh release create v1.0.0 --title "BarStripeLab v1.0.0 — barcode art generator"`
+
+### Deploy prerequisites
+**None for the basic flow.** Optional:
+- Your custom domain pointing at GitHub Pages (or wherever you deploy)
+- AI provider key only if using the AI style generator feature
