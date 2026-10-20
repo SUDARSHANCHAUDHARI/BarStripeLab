@@ -4,7 +4,7 @@ import Generator from "../../components/Generator";
 import InfoSections, { ShapeLinks } from "../../components/InfoSections";
 
 interface ShapePageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 // Only the listed shapes exist; anything else is a 404 in the static export.
@@ -14,8 +14,9 @@ export function generateStaticParams() {
   return SHAPE_IDS.map((id) => ({ id }));
 }
 
-export function generateMetadata({ params }: ShapePageProps): Metadata {
-  const shape = getShape(params.id);
+export async function generateMetadata({ params }: ShapePageProps): Promise<Metadata> {
+  const { id } = await params;
+  const shape = getShape(id);
   const title = `${shape.label} Barcode Generator — BarStripeLab`;
   const description = `${shape.description} Free shape barcode for EAN-13, EAN-8, UPC-A and Code 128, exported as SVG or PNG.`;
   const url = `/shape/${shape.id}`;
@@ -30,8 +31,9 @@ export function generateMetadata({ params }: ShapePageProps): Metadata {
   };
 }
 
-export default function ShapePage({ params }: ShapePageProps) {
-  const shape = getShape(params.id);
+export default async function ShapePage({ params }: ShapePageProps) {
+  const { id } = await params;
+  const shape = getShape(id);
   // Same category first, so the closest alternatives lead the list.
   const others = SHAPES.filter((s) => s.id !== shape.id).sort(
     (a, b) => Number(b.category === shape.category) - Number(a.category === shape.category)
