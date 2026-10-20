@@ -43,8 +43,7 @@ export default function BarcodeTattooPage() {
           Turn a birth date, a lucky number or a name into a barcode your tattoo artist can work from.
         </p>
       </div>
-      {/* Pass mode="art" here once the flow accepts it, so this page opens in Art mode. */}
-      <Generator />
+      <Generator mode="art" />
 
       <section aria-labelledby="tattoo-tips-title" className="mt-20 space-y-5">
         <h2 id="tattoo-tips-title" className="text-[clamp(28px,3.4vw,40px)] leading-[1.1]">
