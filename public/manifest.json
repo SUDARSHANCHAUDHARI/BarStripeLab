@@ -4,8 +4,8 @@
   "description": "Turn EAN-13, EAN-8, UPC-A and Code 128 barcodes into shapes, each with a protected scan band. Free, in your browser, SVG, PDF and PNG export.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f5f5f7",
-  "theme_color": "#f5f5f7",
+  "background_color": "#EDF0EA",
+  "theme_color": "#EDF0EA",
   "orientation": "portrait-primary",
   "icons": [
     {
