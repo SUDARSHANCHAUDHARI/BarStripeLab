@@ -24,4 +24,11 @@ export const formatSize = ({ widthMm, heightMm }: Size) =>
 
 export const formatMmShort = ({ widthMm, heightMm }: Size) => `${widthMm.toFixed(2)} × ${heightMm.toFixed(2)} mm`;
 
+// One line for every size display: the standard barcode, and the whole artwork when a shape makes it larger.
+export function sizeSummary(composed: ComposedBarcode, xMm: number): string {
+  const { standard, withShape } = artworkSizes(composed, xMm);
+  const grew = Math.abs(withShape.widthMm - standard.widthMm) > 0.005 || Math.abs(withShape.heightMm - standard.heightMm) > 0.005;
+  return grew ? `${formatMmShort(standard)} · with shape ${formatMmShort(withShape)}` : formatMmShort(standard);
+}
+
 export const svgDataUri = (svg: string) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;

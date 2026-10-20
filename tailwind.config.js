@@ -16,7 +16,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Redesign tokens (spec section 6). Old tokens below stay until the old UI is removed.
+        // Redesign tokens (spec section 6).
         board: "#EDF0EA",
         card: "#FFFFFF",
         ink: "#16211C",
@@ -34,15 +34,8 @@ module.exports = {
         kraft: "#C89F70",
         cut: "#C0186A",
         fold: "#00739E",
-        ink2: "#1d1d1f",
-        muted: "#4b4b4f",
-        paper: "#f5f5f7",
-        field: "#e6e6ea",
-        danger: "#b3001b",
       },
       fontFamily: {
-        // Old override: the legacy components inherit it. Removable once nothing uses font-sans on its own.
-        sans: MONO,
         // The --font-* variables come from next/font/local in app/layout.tsx.
         mono: ["var(--font-mono)", ...MONO],
         display: ["var(--font-display)", "ui-sans-serif", "system-ui", "sans-serif"],
