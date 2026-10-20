@@ -1,74 +1,23 @@
-"use client";
-
-import { useState } from "react";
+const SHORTCUTS = [
+  ["/", "Open all settings"],
+  ["Alt + S", "Next shape"],
+  ["Alt + C", "Next colour"],
+  ["Alt + D", "Download SVG"],
+  ["Alt + P", "Download PNG"],
+  ["Alt + H", "Share"],
+];
 
 export default function KeyboardShortcutsInfo() {
-  const [open, setOpen] = useState(false);
-
   return (
-    <>
-      <button
-        onClick={() => setOpen(!open)}
-        className="text-xs text-gray-500 hover:text-gray-700 transition"
-        title="Show keyboard shortcuts"
-      >
-        ⌨️ Shortcuts
-      </button>
-
-      {open && (
-        <div className="mt-4 p-4 bg-gray-100 rounded-lg border border-gray-300">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="font-semibold text-gray-800">Keyboard Shortcuts</h3>
-            <button
-              onClick={() => setOpen(false)}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-            <div className="space-y-1">
-              <p>
-                <kbd className="px-2 py-1 bg-white border rounded text-xs font-mono">
-                  Alt + S
-                </kbd>{" "}
-                <span className="text-gray-700">Next Style</span>
-              </p>
-              <p>
-                <kbd className="px-2 py-1 bg-white border rounded text-xs font-mono">
-                  Alt + C
-                </kbd>{" "}
-                <span className="text-gray-700">Change Color</span>
-              </p>
-            </div>
-
-            <div className="space-y-1">
-              <p>
-                <kbd className="px-2 py-1 bg-white border rounded text-xs font-mono">
-                  Alt + D
-                </kbd>{" "}
-                <span className="text-gray-700">Download SVG</span>
-              </p>
-              <p>
-                <kbd className="px-2 py-1 bg-white border rounded text-xs font-mono">
-                  Alt + P
-                </kbd>{" "}
-                <span className="text-gray-700">Download PNG</span>
-              </p>
-            </div>
-
-            <div className="col-span-1 sm:col-span-2">
-              <p>
-                <kbd className="px-2 py-1 bg-white border rounded text-xs font-mono">
-                  Alt + H
-                </kbd>{" "}
-                <span className="text-gray-700">Share</span>
-              </p>
-            </div>
-          </div>
+    <dl className="grid gap-x-6 gap-y-2 text-base sm:grid-cols-2">
+      {SHORTCUTS.map(([keys, action]) => (
+        <div key={keys} className="flex items-center gap-3">
+          <dt>
+            <kbd className="rounded-md border border-b-2 border-rule bg-card px-2 py-1 font-mono text-sm text-ink">{keys}</kbd>
+          </dt>
+          <dd className="text-ink-2">{action}</dd>
         </div>
-      )}
-    </>
+      ))}
+    </dl>
   );
 }

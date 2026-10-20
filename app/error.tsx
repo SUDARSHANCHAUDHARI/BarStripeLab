@@ -15,21 +15,12 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-red-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-md text-center">
-        <h2 className="text-2xl font-bold text-red-600 mb-2">
-          Oops! Something went wrong
-        </h2>
-        <p className="text-gray-600 mb-4">
-          An unexpected error occurred. Please try again.
-        </p>
-        <button
-          onClick={() => reset()}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-medium transition"
-        >
-          Try Again
-        </button>
-      </div>
-    </div>
+    <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-start justify-center gap-4 px-4">
+      <h1 className="text-lg font-black uppercase text-ink">Something went wrong</h1>
+      <p className="text-muted">An unexpected error occurred. Please try again.</p>
+      <button type="button" onClick={() => reset()} className="btn px-6 py-3">
+        Try again
+      </button>
+    </main>
   );
 }

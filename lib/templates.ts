@@ -1,54 +1,12 @@
-import { Template } from "@/types";
+import type { Template } from "@/types";
 
 export const templates: Template[] = [
-  {
-    name: "Spotify Style",
-    color: "#1DB954",
-    style: [
-      { type: "curve", height: 20 },
-      { type: "curve", height: 25 },
-    ],
-  },
-
-  {
-    name: "Coffee Brand",
-    color: "#6F4E37",
-    style: [
-      { type: "curve", height: 30 },
-      { type: "triangle", height: 20 },
-    ],
-  },
-
-  {
-    name: "Tech Minimal",
-    color: "#000000",
-    style: [{ type: "rect", height: 40 }],
-  },
-
-  {
-    name: "Ocean Wave",
-    color: "#0077BE",
-    style: [
-      { type: "curve", height: 35 },
-      { type: "curve", height: 28 },
-    ],
-  },
-
-  {
-    name: "Forest",
-    color: "#2D5016",
-    style: [
-      { type: "triangle", height: 45 },
-      { type: "triangle", height: 35 },
-    ],
-  },
-
-  {
-    name: "Sunset",
-    color: "#FF6B35",
-    style: [
-      { type: "curve", height: 30 },
-      { type: "rect", height: 25 },
-    ],
-  },
+  { name: "Coffee Roaster", color: "#4A2C1D", shape: "coffee" },
+  { name: "Pizza Night", color: "#9B1C1C", shape: "pizza" },
+  { name: "Craft Brewery", color: "#7A4300", shape: "beer" },
+  { name: "Wine Cellar", color: "#5B1A2E", shape: "wine" },
+  { name: "Ocean Catch", color: "#0B3D5C", shape: "whale" },
+  { name: "Pet Pantry", color: "#3D2B6B", shape: "paw" },
+  { name: "Green Grocer", color: "#1F5A32", shape: "leaf" },
+  { name: "Made With Love", color: "#A4133C", shape: "heart" },
 ];

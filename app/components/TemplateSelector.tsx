@@ -1,34 +1,36 @@
 "use client";
 
+import { useId } from "react";
 import { templates } from "@/lib/templates";
+import { getShape } from "@/lib/shapes";
 import type { Template } from "@/types";
+import ShapeThumb from "./ShapeThumb";
+import { FOCUS } from "./flow/ui";
 
 interface TemplateSelectorProps {
   onSelect: (template: Template) => void;
 }
 
-export default function TemplateSelector({
-  onSelect,
-}: TemplateSelectorProps) {
+export default function TemplateSelector({ onSelect }: TemplateSelectorProps) {
+  const labelId = useId();
+
   return (
-    <div className="mt-6">
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Quick Templates
-      </label>
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+    <div>
+      <h3 id={labelId} className="mb-2 text-base font-bold text-ink">
+        Templates
+      </h3>
+      <div role="group" aria-labelledby={labelId} className="grid grid-cols-2 gap-2">
         {templates.map((tmpl) => (
           <button
             key={tmpl.name}
+            type="button"
             onClick={() => onSelect(tmpl)}
-            className="p-3 border border-gray-300 rounded hover:bg-gray-100 transition flex flex-col items-center gap-2"
+            className={`flex min-h-[44px] items-center gap-2 rounded-xl border-2 border-rule bg-card px-3 py-2 text-left text-base leading-tight text-ink hover:border-ink ${FOCUS}`}
           >
-            <div
-              className="w-8 h-8 rounded border border-gray-400"
-              style={{ backgroundColor: tmpl.color }}
-            />
-            <span className="text-xs text-center font-medium">
-              {tmpl.name}
+            <span style={{ color: tmpl.color }} className="shrink-0">
+              <ShapeThumb shape={getShape(tmpl.shape)} className="h-6 w-6" />
             </span>
+            <span className="min-w-0 break-words">{tmpl.name}</span>
           </button>
         ))}
       </div>

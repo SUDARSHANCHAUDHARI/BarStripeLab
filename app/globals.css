@@ -2,30 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 1rem;
+  }
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background-color: #f9fafb;
-}
-
-input[type="text"],
-input[type="color"],
-select,
-textarea {
-  font-size: 16px;
-}
-
-@media (max-width: 640px) {
   body {
-    font-size: 14px;
+    @apply bg-board font-body text-lg leading-[1.55] text-ink antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display font-bold;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  a {
+    text-underline-offset: 3px;
+  }
+
+  :focus-visible {
+    outline: 3px solid theme("colors.focus");
+    outline-offset: 3px;
+  }
+
+  /* The focus blue is 1.5:1 on the mat, so the result stage uses a light ring. */
+  .on-mat :focus-visible {
+    outline-color: theme("colors.card");
+  }
+}
+
+@layer components {
+  /* Legacy classes for the old UI (Controls, Generator, error page). Removable with ink2, muted, paper, field, danger. */
+  .field-label {
+    @apply block text-xs font-black uppercase tracking-wide text-ink;
+  }
+
+  .btn {
+    @apply border-2 border-ink bg-white px-3 py-2 text-xs font-black uppercase text-ink hover:bg-field aria-pressed:bg-ink aria-pressed:text-white aria-pressed:hover:bg-ink disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .field {
+    @apply w-full border-0 bg-field px-3 py-3 text-ink placeholder:text-muted;
+  }
+
+  .notice {
+    @apply border-2 border-ink bg-white p-3 text-xs;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
   }
 }

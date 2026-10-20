@@ -1,106 +1,42 @@
 # Status — BarStripeLab
 
-**Last updated:** 2026-06-21
-**Maturity:** 🟢 `status-production-ready`
+Last updated: 2026-10-21
 
-## What's done
+## Where it is
 
-- Barcode generation via `bwip-js`: EAN-13, EAN-8, CODE 128
-- Style overlays + color presets (artEngine, styleEngine, shapeRenderer, colorEngine, colorPresets)
-- SVG composer + downloadable PNG export
-- AI-driven style generator
-- Templates + column mapper
-- Keyboard shortcuts
-- Share button
-- API key input UI
-- ESLint configured (was missing — `next lint` had been prompting interactively)
-- 15 tests for `lib/ean13checksum.ts` — checksum calculation, validation, normalization. EAN test vectors verified against the Wikipedia EAN-13 / EAN-8 reference examples (4006381333931, 9780201379624, 96385074)
-- Build, lint (0 errors), typecheck, tests all green
+The live site at https://barstripelab.pages.dev is built by Cloudflare Pages from `main`. The Cloudflare setting is in the dashboard, so it is not checked from this repo.
 
-## What's left
+The redesign is on branch `feat/real-styles-ai-shortcuts`, 34 commits ahead of `main`. The home page is a four-step flow. It takes a number, asks where the barcode will be scanned, lets you pick one of 46 shapes, and shows the result on a product panel: a coffee bag, a can, a snack box or a swing tag.
 
-- **2 pre-existing lint warnings** (not blocking): `<img>` should be `next/image` in BarcodeCanvas, missing `useEffect` dep on `page.tsx:128`. Worth addressing but not regressions.
-- **Live deploy** via existing `pnpm deploy:gh` (GitHub Pages static export) — zero env vars needed
-- Optional: tests for the style/art/color engines (currently only the EAN checksum module is unit-tested)
+Retail-safe mode is the default. It keeps every bar at full height along the bottom band, and the shape sits above it. Art mode shortens the bars so the shape can take more room. Art mode is for phones and looks, not for strict checkout scanners.
 
-## Quality gates
+Each design gets a scan-safety estimate from 0 to 100 and an in-browser decode check. The estimate is a heuristic, not a GS1 verification.
 
-| Gate | Status |
-|---|---|
-| Build | ✅ |
-| Lint | ✅ 0 errors (2 warnings, pre-existing) |
-| Typecheck | ✅ |
-| Tests | ✅ 15 / 1 suite |
+Exports are SVG and PDF at the exact printed size, PNG at 150, 300 or 600 dpi, a spec-sheet PDF, and a ZIP of up to 500 barcodes from a list or CSV. A share link holds the whole design.
 
-## Deployment
+The AI generator uses `claude-opus-5-5` with the visitor's own Anthropic key. The key is sent only to api.anthropic.com.
 
-Not yet deployed. `pnpm deploy:gh` is wired up for **GitHub Pages** (uses `gh-pages` to publish `out/`).
+There is a `/barcode-tattoo` page that opens in Art mode. Every shape has its own page. The sitemap lists the home page, the tattoo page and the 46 shape pages.
 
-## File-by-file checklist
+Fonts are self-hosted in `public/fonts` under the OFL.
 
-### App shell
-- [x] `app/layout.tsx`, `app/page.tsx`, `app/globals.css`, `app/error.tsx` — full editor UI
+`public/_headers` adds a Content-Security-Policy and a Permissions-Policy next to the existing security headers.
 
-### Components (`app/components/`)
-- [x] `BarcodeCanvas.tsx` — barcode render surface (uses `<img>` — flagged as lint warning)
-- [x] `Controls.tsx` — primary editor controls
-- [x] `DownloadButton.tsx` — PNG / SVG export
-- [x] `ColorPanel.tsx` — color picker + presets
-- [x] `TemplateSelector.tsx` — style template chooser
-- [x] `ShareButton.tsx` — share link
-- [x] `AIInput.tsx` — AI style prompt input
-- [x] `KeyboardShortcutsInfo.tsx` — shortcuts panel
+On 2026-10-21, `pnpm test` passed 153 tests in 17 files, `pnpm typecheck` and `pnpm lint` passed, and `pnpm build` produced the static export.
 
-### Lib
-- [x] `lib/barcode.ts` — bwip-js wrapper
-- [x] `lib/ean13checksum.ts` — EAN-13 / EAN-8 / CODE128 checksum logic (verified against Wikipedia vectors)
-- [x] `lib/colorEngine.ts`, `lib/colorPresets.ts` — color handling
-- [x] `lib/styles.ts`, `lib/styleEngine.ts` — style application
-- [x] `lib/templates.ts` — style templates
-- [x] `lib/artEngine.ts` — composition engine
-- [x] `lib/svgComposer.ts` — SVG assembly
-- [x] `lib/shapeRenderer.tsx` — shape primitives
-- [x] `lib/columnMapper.ts` — column mapping
-- [x] `lib/aiStyleGenerator.ts` — AI style integration
-- [x] `lib/useKeyboardShortcuts.ts` — keyboard hooks
+## Not yet verified
 
-### Types
-- [x] `types/index.ts`
+- No exported barcode has been scanned with a real scanner or phone app. This matters most in Art mode, where the bars are shorter than the GS1 minimum.
+- The in-browser decode check reads the rendered pixels. It has not been compared with a real scanner.
+- The Content-Security-Policy has not been checked in a browser on Cloudflare Pages. Local servers do not apply `_headers`.
+- The `#` comment lines added to `public/_headers` are not checked against Cloudflare's parser.
+- Social previews (Open Graph and Twitter cards) have not been checked with the platforms' validators.
+- The mobile layout has not been checked on real phones.
+- The shape credits in `THIRD_PARTY_NOTICES.md` have not been checked against the upstream sources. The Phosphor version number there is not checked against the copied paths.
 
-### Tests
-- [x] `lib/ean13checksum.test.ts` — 15 tests
+## Next
 
-### Quality + scaffolding
-- [x] ESLint configured (0 errors, 2 pre-existing warnings)
-- [x] `typecheck` + `test` scripts
-- [x] Build + lint + typecheck green
-- [x] `pnpm deploy:gh` wired for GitHub Pages static export
-
-### Not done (small)
-- [ ] Fix `<img>` → `next/image` in `BarcodeCanvas.tsx` (lint warning)
-- [ ] Fix missing `useEffect` dep in `app/page.tsx:128` (lint warning)
-- [ ] Tests for style / art / color engines (currently only EAN checksum module is unit-tested)
-- [ ] Live deploy via `pnpm deploy:gh` (zero env vars needed)
-
-## Categorized work remaining
-
-| Item | Effort | Bucket | Blocker | Priority |
-|------|--------|--------|---------|----------|
-| Fix `<img>` → `next/image` in `BarcodeCanvas.tsx` | ~30m | 🟦 Pure code | none | P3 |
-| Fix missing `useEffect` dep at `app/page.tsx:128` | ~15m | 🟦 Pure code | none | P3 |
-| Add tests for `styleEngine`, `colorEngine`, `artEngine` | ~3h | 🟦 Pure code | none | P2 |
-| Deploy to your domain via `pnpm deploy:gh` | ~15m | 🔑 Needs hosting | GitHub Pages already in place; or use static output for your host | P1 |
-
-## Release plan
-
-1. **Polish:** address the 2 lint warnings and add the engine tests (each warning is one-line; tests are bounded).
-2. **Deploy:**
-   - Easy path: `pnpm deploy:gh` publishes the static export to GitHub Pages
-   - Custom domain: add a `CNAME` file inside `out/` (or set in repo Settings → Pages) before deploy
-   - Custom host: `pnpm export` then `rsync out/ user@host:/path/`
-3. **Tag release:** `gh release create v1.0.0 --title "BarStripeLab v1.0.0 — barcode art generator"`
-
-### Deploy prerequisites
-**None for the basic flow.** Optional:
-- Your custom domain pointing at GitHub Pages (or wherever you deploy)
-- AI provider key only if using the AI style generator feature
+- Scan printed exports (SVG, PDF and PNG) of each format with several scanner apps.
+- Load the production site with the browser console open and check for CSP violations, including the AI generator call and the PNG export.
+- Decide on branch `chore/next-15`. It upgrades Next.js to 15.5 and React to 19, and removes `gh-pages` and `html-to-image` from `package.json`. It has no pull request yet.
+- Remove `html-to-image` from `package.json` on `feat/real-styles-ai-shortcuts`. No source file imports it now.

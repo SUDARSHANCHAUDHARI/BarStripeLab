@@ -1,107 +1,102 @@
 # BarStripeLab
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](package.json)
-[![Next.js](https://img.shields.io/badge/Next.js-14.2.5-black.svg)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-18.3-61DAFB.svg)](https://react.dev/)
-[![Release](https://img.shields.io/badge/release-production%20candidate-orange.svg)](RELEASE_MEMORY.md)
+BarStripeLab makes EAN-13, EAN-8, UPC-A and Code 128 barcodes with a scan-safety estimate and a decode check, so you can look before you print. The twist is the shape: the bars can be cut into one of 46 silhouettes, such as a coffee cup, a cat or a palm tree.
 
-Artistic barcode generator that turns EAN-style barcodes into brandable, scannable assets with custom overlays, colors, and SVG/PNG export.
+It is free, has no account and runs entirely in your browser.
 
-> **Status:** Production web candidate · build verified · final release needs scanner-app QA and live Cloudflare Pages URL
+**Live:** https://barstripelab.pages.dev
 
-## Table of Contents
+![BarStripeLab: barcodes shaped as a coffee cup, a cat, a palm tree and a heart](public/og-image.png)
 
-- [Why This Exists](#why-this-exists)
-- [Status](#status)
-- [Key Technical Decisions](#key-technical-decisions)
-- [Features](#features)
-- [Getting Started](#getting-started)
-- [Deployment](#deployment)
-- [Verification](#verification)
-- [Known Limits](#known-limits)
-- [About](#about)
+## How it works
 
-## Why This Exists
+The generator is one four-step flow:
 
-Most barcode tools produce plain utility output. BarStripeLab explores a practical middle ground: keep barcode scan safety while adding enough art direction for packaging, brand mockups, and visual experiments.
+1. **Number.** Type the number. The check digit is checked as you type, and the format is detected. You can choose the format yourself.
+2. **Where it will be scanned.** Shops or Amazon (Retail-safe), or phones and looks (Art). Then choose the size.
+3. **Shape.** Pick one of the 46 shapes, a colour preset or a template. Or describe a style to the AI generator.
+4. **Result.** The barcode on a product panel (coffee bag, can, snack box or swing tag), with the scan check, the decode check and the downloads.
 
-## Status
+Press `/`, or use **All settings** in the header, to open every setting in one sheet.
 
-| Item | State |
-|---|---|
-| Release type | Production web candidate |
-| Build | Verified |
-| Deployment target | Cloudflare Pages |
-| Manual QA | Scanner tests pending |
-| Last verified | 2026-06-04 |
+Every shape has its own page at `/shape/<id>`. There is also a [barcode tattoo page](https://barstripelab.pages.dev/barcode-tattoo), which opens in Art mode.
 
-## Key Technical Decisions
+## Formats
 
-**EAN safety is protected by preserving scan-critical regions.** The app keeps the bottom scan area untouched so visual styling does not fully override barcode readability.
+- **EAN-13 and UPC-A**: digits only. Leave off the check digit and it is added: 12 digits for EAN-13, 11 for UPC-A.
+- **EAN-8**: 7 or 8 digits.
+- **Code 128**: letters, numbers, spaces and symbols (printable ASCII), up to 48 characters. Accents and emoji are refused.
 
-**SVG and PNG exports serve different production needs.** SVG gives scalable artwork; PNG gives high-resolution export for quick previews and sharing.
+EAN-13, EAN-8 and UPC-A print from 80% to 200% of the standard size (module width X = 0.330 mm at 100%). Code 128 module width is 0.19 mm to 1.00 mm. Bar width reduction, from 0 to 0.10 mm, makes the bars thinner to allow for ink spread. Ask your printer what to set.
 
-**The app is self-contained.** Barcode generation and export happen in-browser without requiring accounts, server storage, or user data.
+## Scan safety
 
-**Cloudflare Pages is the intended production host.** The app builds as a lightweight web app with static headers and no backend dependency.
+- **Retail-safe** (the default): every bar keeps full height along the bottom band, and the shape sits above it. Use it for shops and Amazon.
+- **Art**: the shape gets more room, and the bars are shorter. Phones read them. Strict checkout scanners may not.
+- **Quiet zones**: blank margins on both sides, at least the minimum for the format (GS1 for EAN and UPC, ISO/IEC 15417 for Code 128). Keep them clear when you place the artwork.
+- **Scan check**: a 0 to 100 estimate from the design. It weighs red-light contrast, bar height, quiet zones, print size, digits and camera contrast. 80 and above is "likely fine", 50 to 79 is "risky", and below 50 is "likely to fail". A colour that looks white to red-laser scanners caps the score at 20.
+- **Decode check**: the app draws the barcode and decodes it in your browser. The result must equal your number.
+- **Contrast warnings**: a warning appears when the bars are too pale to scan, and another when the colour is red, orange or pink.
 
-## Features
+Honest limits:
 
-- artistic barcode styling
-- 12-digit input with EAN-13 checksum support
-- 13-digit barcode input support
-- style presets such as wave, mountain, and city concepts
-- color customization
-- SVG export
-- high-resolution PNG export
-- responsive desktop/mobile interface
+- The scan check is an estimate from the design. It is not a GS1 verification. GS1 does not endorse decorated barcodes.
+- The red-light check uses screen colours as a stand-in for printed ink. It is not a print test.
+- The decode check reads your browser's rendering, not a checkout scanner.
+- Print one copy at the real size, on the real material, and scan it with the scanners your customers and shops use, before a full run.
+- Retailers expect numbers licensed to your company by GS1. BarStripeLab draws the digits you enter. It cannot issue or register a number.
 
-## Getting Started
+## Exports
+
+- **SVG**: vector artwork. Its width and height are set in millimetres, so it opens at the printed size. You can also copy the SVG to the clipboard.
+- **PDF**: the same artwork at the printed size.
+- **PNG**: 150, 300 or 600 dpi (300 by default). The file records its dpi, so print apps use it.
+- **Spec sheet PDF**: the design, the scan check and the sizes, for your printer. It is an estimate, not a verification.
+- **Many barcodes**: paste a list, or a CSV (the first column). Up to 500 numbers are used. You get a ZIP with one SVG per number, and a PDF per number if you tick the box.
+- **Share links**: the address bar always holds the whole design, so the link reproduces the exact barcode.
+
+Keyboard shortcuts, held with Option (Alt): S changes the shape, C changes the colour preset, D downloads the SVG, P downloads the PNG, and H shares.
+
+## Privacy and the AI generator
+
+The barcode is drawn in your browser. The source has no analytics code. The site is served by Cloudflare Pages, which handles the page requests.
+
+The last design is kept in your browser's local storage, so "Continue where you left off" works. Clear the site's data to remove it.
+
+The AI generator is optional. It asks Claude (`claude-opus-5-5`) to suggest a shape and a colour from a short description. Paste your own Anthropic API key. The key stays in the page's memory and is never stored. The key and your description go only to api.anthropic.com, and each request is billed to your Anthropic account. Everything else works without a key.
+
+## Shapes and licenses
+
+The shape artwork comes from [Phosphor Icons](https://phosphoricons.com) (MIT) and [game-icons.net](https://game-icons.net) (CC BY 3.0). The full licenses, credits and the changes made to each game-icons.net shape are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The app code is MIT, see [LICENSE](LICENSE).
+
+## Development
+
+Requires Node 20.19.6 (see `.nvmrc`) and pnpm.
 
 ```bash
 pnpm install
-pnpm dev
+pnpm dev          # http://localhost:3000
+pnpm test         # vitest
+pnpm typecheck    # tsc --noEmit
+pnpm lint         # next lint
+pnpm build        # static export to out/
 ```
 
-Open:
+No environment variables are needed. `.env.example` documents the one optional setting, `BASE_PATH`, for serving the export from a sub-path.
 
-```txt
-http://localhost:3000
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add a shape or a template.
 
 ## Deployment
 
-| Setting | Value |
-|---|---|
-| Release scope | Production web candidate |
-| Framework preset | `Next.js` |
-| Build command | `pnpm build` |
-| Build output directory | `out` |
-| Node version | `20.19.6` |
+The site is a Next.js static export (`output: "export"`). Cloudflare Pages builds it from the `main` branch with:
 
-After deployment, add the live URL here and run scanner QA against real exported barcodes.
+- Build command: `pnpm build`
+- Build output directory: `out`
+- Node version: `20.19.6`
 
-## Verification
+The Cloudflare Pages settings are in the Cloudflare dashboard, not in this repo.
 
-```bash
-pnpm build
-pnpm exec tsc --noEmit
-```
-
-Manual release checks:
-
-- generate a 12-digit barcode and verify checksum behavior
-- generate a 13-digit barcode
-- export SVG
-- export PNG
-- scan several generated outputs with real scanner apps
-- test desktop and mobile layout
-
-## Known Limits
-
-- Artistic overlays can reduce scan reliability if pushed too far.
-- Final production launch should include real scanner-app validation.
-- No backend persistence or saved style history yet.
+`public/_headers` sets the security headers, including the Content-Security-Policy, and long-lived caching for `/_next/static/*`. The sitemap (`/sitemap.xml`) and `robots.txt` are generated at build time.
 
 ---
 

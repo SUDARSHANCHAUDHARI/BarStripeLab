@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface KeyboardShortcuts {
   toggleStyle?: () => void;
@@ -8,55 +8,41 @@ interface KeyboardShortcuts {
   share?: () => void;
 }
 
-export function useKeyboardShortcuts({
-  toggleStyle,
-  toggleColor,
-  downloadSVG,
-  downloadPNG,
-  share,
-}: KeyboardShortcuts) {
+export function useKeyboardShortcuts(shortcuts: KeyboardShortcuts) {
+  // Callers pass fresh closures every render; the listener reads the latest through a ref.
+  const latest = useRef(shortcuts);
   useEffect(() => {
+    latest.current = shortcuts;
+  });
+
+  useEffect(() => {
+    // event.code, not event.key: on macOS Option+S types "ß", not "s".
+    const keys: Record<string, keyof KeyboardShortcuts> = {
+      KeyS: "toggleStyle",
+      KeyC: "toggleColor",
+      KeyD: "downloadSVG",
+      KeyP: "downloadPNG",
+      KeyH: "share",
+    };
+
     function handleKeyDown(event: KeyboardEvent) {
-      // Ignore if user is typing in input
+      // Ignore if user is typing in a field
       if (
         event.target instanceof HTMLInputElement ||
-        event.target instanceof HTMLTextAreaElement
+        event.target instanceof HTMLTextAreaElement ||
+        event.target instanceof HTMLSelectElement
       ) {
         return;
       }
 
-      // Alt + S = Style
-      if (event.altKey && event.key.toLowerCase() === "s") {
+      const action = event.altKey ? latest.current[keys[event.code]] : undefined;
+      if (action) {
         event.preventDefault();
-        toggleStyle?.();
-      }
-
-      // Alt + C = Color
-      if (event.altKey && event.key.toLowerCase() === "c") {
-        event.preventDefault();
-        toggleColor?.();
-      }
-
-      // Alt + D = Download SVG
-      if (event.altKey && event.key.toLowerCase() === "d") {
-        event.preventDefault();
-        downloadSVG?.();
-      }
-
-      // Alt + P = PNG
-      if (event.altKey && event.key.toLowerCase() === "p") {
-        event.preventDefault();
-        downloadPNG?.();
-      }
-
-      // Alt + H = Share
-      if (event.altKey && event.key.toLowerCase() === "h") {
-        event.preventDefault();
-        share?.();
+        action();
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggleStyle, toggleColor, downloadSVG, downloadPNG, share]);
+  }, []);
 }

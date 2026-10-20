@@ -8,6 +8,7 @@ import {
   normalizeEAN13,
   normalizeEAN8,
   normalizeCODE128,
+  normalizeUPCA,
 } from "./ean13checksum";
 
 describe("calculateEAN13Checksum", () => {
@@ -85,6 +86,13 @@ describe("normalize helpers", () => {
 
   it("normalizeEAN8 adds a checksum to a 7-digit code", () => {
     expect(normalizeEAN8("9638507")).toBe("96385074");
+  });
+
+  it("normalizeUPCA adds the check digit and validates 12 digits", () => {
+    // 036000291452 is the GS1 UPC-A reference example.
+    expect(normalizeUPCA("03600029145")).toBe("036000291452");
+    expect(normalizeUPCA("036000291452")).toBe("036000291452");
+    expect(normalizeUPCA("036000291453")).toBeNull();
   });
 
   it("normalizeCODE128 trims and validates", () => {
