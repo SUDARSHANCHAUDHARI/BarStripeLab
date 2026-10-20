@@ -53,9 +53,9 @@ export function isValidEAN8(value: string): boolean {
 }
 
 export function isValidCODE128(value: string): boolean {
-  // CODE 128 accepts alphanumeric and special characters
-  // No formal checksum validation (scanner-enforced)
-  return value.length > 0 && value.length <= 48;
+  // CODE 128 encodes printable ASCII (space to ~); accents and emoji are not
+  // reliably scannable. No formal checksum validation (scanner-enforced).
+  return /^[\x20-\x7E]{1,48}$/.test(value);
 }
 
 export function normalizeEAN13(value: string): string | null {

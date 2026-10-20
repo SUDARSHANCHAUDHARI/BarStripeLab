@@ -8,6 +8,7 @@ import type {
 import { extractColumns } from "@/lib/columnMapper";
 import { buildGradientDef, buildPaintValue } from "@/lib/colorEngine";
 import { renderSilhouette, resolveStyleDefinition } from "@/lib/artEngine";
+import { BARCODE_SCALE } from "@/lib/barcode";
 
 const SAFE_ZONE_RATIO = 0.2;
 const DEFAULT_VIEWBOX = "0 0 190 58";
@@ -16,6 +17,13 @@ const LABEL_ZONE_RATIO = 0.1;
 const PALM_OUTPUT_HEIGHT_RATIO = 1.14;
 const PALM_SAFE_ZONE_RATIO = 0.26;
 const PALM_LABEL_ZONE_RATIO = 0.13;
+
+// Minimum blank margins in modules (GS1 for EAN, ISO/IEC 15417 for Code 128).
+const QUIET_ZONE_MODULES: Record<BarcodeFormat, { left: number; right: number }> = {
+  ean13: { left: 11, right: 7 },
+  ean8: { left: 7, right: 7 },
+  code128: { left: 10, right: 10 },
+};
 
 function parseViewBox(svg: string): { width: number; height: number; viewBox: string } {
   const match = svg.match(/viewBox="([^"]+)"/);
@@ -348,7 +356,10 @@ export function composeBarcodeSvg(
   );
   const labelZoneRatio = isPalmLayout ? PALM_LABEL_ZONE_RATIO : LABEL_ZONE_RATIO;
   const barcodeHeight = outputHeight * (1 - labelZoneRatio);
-  const outputViewBox = `0 0 ${width} ${outputHeight}`;
+  const quietLeft = QUIET_ZONE_MODULES[format].left * BARCODE_SCALE;
+  const quietRight = QUIET_ZONE_MODULES[format].right * BARCODE_SCALE;
+  const totalWidth = width + quietLeft + quietRight;
+  const outputViewBox = `0 0 ${totalWidth} ${outputHeight}`;
   const columns = extractColumns(rawBarcodeSvg);
   const barcodeRects = buildBarcodeRects(columns, width, sourceHeight, barcodeHeight);
 
@@ -424,10 +435,12 @@ export function composeBarcodeSvg(
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="${outputViewBox}" role="img" aria-label="Art barcode">
       <desc>Masked barcode art with preserved bottom scan zone.</desc>
       ${defs}
-      <rect width="${width}" height="${outputHeight}" fill="#ffffff" />
-      ${topArtwork}
-      ${bottomSafeBars}
-      ${digitsLabel}
+      <rect width="${totalWidth}" height="${outputHeight}" fill="#ffffff" />
+      <g transform="translate(${quietLeft} 0)">
+        ${topArtwork}
+        ${bottomSafeBars}
+        ${digitsLabel}
+      </g>
     </svg>
   `.trim();
 }

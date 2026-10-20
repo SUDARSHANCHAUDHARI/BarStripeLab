@@ -1,6 +1,6 @@
 "use client";
 
-import { COLOR_PRESETS } from "@/lib/colorEngine";
+import { COLOR_PRESETS, safeColor } from "@/lib/colorEngine";
 import type { ColorConfig } from "@/types";
 
 interface ColorPanelProps {
@@ -9,6 +9,8 @@ interface ColorPanelProps {
 }
 
 export default function ColorPanel({ colorConfig, setColorConfig }: ColorPanelProps) {
+  const isValidColor = safeColor(colorConfig.solidColor, "") !== "";
+
   return (
     <div className="mt-6 space-y-3 rounded-lg border border-gray-200 p-4">
       <label className="block text-sm font-medium text-gray-700">Color Mode</label>
@@ -60,7 +62,11 @@ export default function ColorPanel({ colorConfig, setColorConfig }: ColorPanelPr
             onChange={(e) =>
               setColorConfig({ ...colorConfig, solidColor: e.target.value })
             }
-            className="flex-1 rounded border border-gray-300 p-2 text-sm"
+            aria-invalid={!isValidColor}
+            title={isValidColor ? undefined : "Use a hex color like #1DB954"}
+            className={`flex-1 rounded border p-2 text-sm ${
+              isValidColor ? "border-gray-300" : "border-red-500"
+            }`}
           />
         </div>
       )}

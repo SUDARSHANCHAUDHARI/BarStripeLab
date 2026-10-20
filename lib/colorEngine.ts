@@ -9,6 +9,14 @@ export const COLOR_PRESETS: Record<string, string> = {
   royal_purple: "#5a189a",
 };
 
+const HEX_COLOR = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
+
+// Colors are written into SVG attributes, so only hex values may pass.
+export function safeColor(value: string | undefined, fallback = "#000000"): string {
+  const trimmed = (value ?? "").trim();
+  return HEX_COLOR.test(trimmed) ? trimmed : fallback;
+}
+
 export function normalizeStops(stops: GradientStop[]): GradientStop[] {
   if (!stops.length) {
     return [
@@ -20,7 +28,7 @@ export function normalizeStops(stops: GradientStop[]): GradientStop[] {
   return [...stops]
     .map((stop) => ({
       offset: Math.max(0, Math.min(1, stop.offset)),
-      color: stop.color || "#000000",
+      color: safeColor(stop.color),
     }))
     .sort((a, b) => a.offset - b.offset);
 }
@@ -31,7 +39,7 @@ export function getSolidColor(config: ColorConfig): string {
   }
 
   if (config.mode === "custom") {
-    return config.solidColor || "#000000";
+    return safeColor(config.solidColor);
   }
 
   return normalizeStops(config.gradientStops)[0]?.color || "#000000";
