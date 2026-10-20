@@ -86,6 +86,21 @@ export function normalizeEAN8(value: string): string | null {
   return null;
 }
 
+// UPC-A is an EAN-13 with a leading 0, so it shares the EAN-13 check digit.
+export function normalizeUPCA(value: string): string | null {
+  const cleaned = value.replace(/\D/g, "");
+
+  if (cleaned.length === 11) {
+    return calculateEAN13Checksum("0" + cleaned).slice(1);
+  }
+
+  if (cleaned.length === 12 && isValidEAN13("0" + cleaned)) {
+    return cleaned;
+  }
+
+  return null;
+}
+
 export function normalizeCODE128(value: string): string | null {
   const trimmed = value.trim();
   return isValidCODE128(trimmed) ? trimmed : null;

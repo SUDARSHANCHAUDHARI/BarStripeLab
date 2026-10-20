@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import type {
   BarcodeFormat,
   ColorConfig,
-  ModifierId,
-  SilhouetteStyleId,
   StylePreset,
 } from "@/types";
 import { generateBarcodeSVG } from "@/lib/barcode";
@@ -14,8 +12,9 @@ import {
   normalizeEAN13,
   normalizeEAN8,
   normalizeCODE128,
+  normalizeUPCA,
 } from "@/lib/ean13checksum";
-import { STYLE_IDS } from "@/lib/styles";
+import { SHAPE_IDS, getShape } from "@/lib/shapes";
 import { COLOR_PRESETS } from "@/lib/colorEngine";
 import { composeBarcodeSvg } from "@/lib/svgComposer";
 import { useKeyboardShortcuts } from "@/lib/useKeyboardShortcuts";
@@ -35,9 +34,7 @@ export default function Page() {
   const [value, setValue] = useState("5901234123457");
   const [format, setFormat] = useState<BarcodeFormat>("ean13");
   const [composedSvg, setComposedSvg] = useState("");
-  const [style, setStyle] = useState<SilhouetteStyleId>("palm");
-  // null = the style's own default feel
-  const [modifier, setModifier] = useState<ModifierId | null>(null);
+  const [shape, setShape] = useState("coffee");
   const [colorConfig, setColorConfig] = useState<ColorConfig>({
     mode: "preset",
     solidColor: "#000000",
@@ -63,6 +60,8 @@ export default function Page() {
         return normalizeEAN13(barcodeValue);
       case "ean8":
         return normalizeEAN8(barcodeValue);
+      case "upca":
+        return normalizeUPCA(barcodeValue);
       case "code128":
         return normalizeCODE128(barcodeValue);
       default:
@@ -76,6 +75,8 @@ export default function Page() {
         return "Enter a valid 12 or 13 digit barcode. We auto-generate checksum for 12 digits.";
       case "ean8":
         return "Enter a valid 7 or 8 digit barcode. We auto-generate checksum for 7 digits.";
+      case "upca":
+        return "Enter a valid 11 or 12 digit UPC-A. We auto-generate checksum for 11 digits.";
       case "code128":
         return "Enter up to 48 letters, numbers, spaces or symbols (no accents or emoji).";
       default:
@@ -103,16 +104,13 @@ export default function Page() {
         setLoading(true);
 
         const svgCode = await generateBarcodeSVG(normalized, format);
-        const seed = `${format}|${normalized}|${style}|${modifier}|${JSON.stringify(colorConfig)}`;
-        const finalSvg = composeBarcodeSvg(
-          svgCode,
-          style,
+        const finalSvg = composeBarcodeSvg({
+          rawBarcodeSvg: svgCode,
+          shape: getShape(shape),
           colorConfig,
-          seed,
-          normalized,
+          value: normalized,
           format,
-          modifier ?? undefined
-        );
+        });
 
         setComposedSvg(finalSvg);
       } catch (err) {
@@ -129,11 +127,10 @@ export default function Page() {
         clearTimeout(debounceTimer.current);
       }
     };
-  }, [value, format, style, modifier, colorConfig]);
+  }, [value, format, shape, colorConfig]);
 
   function applyPreset(preset: StylePreset): void {
-    setStyle(preset.style);
-    setModifier(preset.modifier);
+    setShape(preset.shape);
     setColorConfig((prev) => ({
       ...prev,
       mode: "custom",
@@ -147,7 +144,7 @@ export default function Page() {
 
   useKeyboardShortcuts({
     toggleStyle: () =>
-      setStyle((current) => STYLE_IDS[(STYLE_IDS.indexOf(current) + 1) % STYLE_IDS.length]),
+      setShape((current) => SHAPE_IDS[(SHAPE_IDS.indexOf(current) + 1) % SHAPE_IDS.length]),
     toggleColor: () =>
       setColorConfig((prev) => ({
         ...prev,
@@ -180,10 +177,8 @@ export default function Page() {
             setValue={setValue}
             format={format}
             setFormat={setFormat}
-            style={style}
-            setStyle={setStyle}
-            modifier={modifier}
-            setModifier={setModifier}
+            shape={shape}
+            setShape={setShape}
           />
 
           <ColorPanel

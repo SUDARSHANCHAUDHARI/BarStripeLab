@@ -1,25 +1,26 @@
 import type { StylePreset } from "@/types";
-import { STYLE_IDS, isStyleId } from "@/lib/styles";
-import { MODIFIER_IDS, isModifierId } from "@/lib/artEngine";
+import { SHAPES, SHAPE_IDS, isShapeId } from "@/lib/shapes";
 import { safeColor } from "@/lib/colorEngine";
 
 export const AI_MODEL = "claude-opus-5-5";
 
-const SYSTEM_PROMPT = `You choose the look of an artistic barcode. The top of the barcode is masked into a silhouette shape and the bottom stays a plain black scan zone.
-Pick the silhouette, the shape modifier and one accent color that best match the user's brand or mood description.
-The accent color fills the artwork bars on a white background, so choose a color with clear contrast against white.`;
+const SYSTEM_PROMPT = `You choose the look of an artistic barcode. The barcode bars are masked into a filled silhouette shape, and a plain band at the bottom keeps it scannable.
+Pick the shape and one bar color that best match the user's brand or mood description.
+The color fills the bars on a white background, so it must be dark enough to contrast clearly with white.
+
+Available shapes (id: label):
+${SHAPES.map((shape) => `${shape.id}: ${shape.label}`).join("\n")}`;
 
 const OUTPUT_SCHEMA = {
   type: "object",
   properties: {
-    style: { type: "string", enum: STYLE_IDS },
-    modifier: { type: "string", enum: MODIFIER_IDS },
+    shape: { type: "string", enum: SHAPE_IDS },
     color: {
       type: "string",
-      description: "Accent color as a 6-digit hex value, for example #1DB954",
+      description: "Bar color as a 6-digit hex value, for example #1DB954",
     },
   },
-  required: ["style", "modifier", "color"],
+  required: ["shape", "color"],
   additionalProperties: false,
 };
 
@@ -34,20 +35,14 @@ export function parseStylePreset(text: string): StylePreset {
     throw new AIStyleError("The AI returned an unreadable answer. Try again.");
   }
 
-  const { style, modifier, color } = (data ?? {}) as Record<string, unknown>;
+  const { shape, color } = (data ?? {}) as Record<string, unknown>;
   const safe = typeof color === "string" ? safeColor(color, "") : "";
 
-  if (
-    typeof style !== "string" ||
-    !isStyleId(style) ||
-    typeof modifier !== "string" ||
-    !isModifierId(modifier) ||
-    !safe
-  ) {
-    throw new AIStyleError("The AI returned a style this app does not know. Try again.");
+  if (typeof shape !== "string" || !isShapeId(shape) || !safe) {
+    throw new AIStyleError("The AI returned a shape this app does not know. Try again.");
   }
 
-  return { style, modifier, color: safe };
+  return { shape, color: safe };
 }
 
 export async function generateAIStyle(prompt: string, apiKey: string): Promise<StylePreset> {

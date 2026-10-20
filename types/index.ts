@@ -5,7 +5,7 @@ export type Column = {
   isBlack: boolean;
 };
 
-export type BarcodeFormat = "ean13" | "ean8" | "code128";
+export type BarcodeFormat = "ean13" | "ean8" | "upca" | "code128";
 
 export type ColorMode = "preset" | "custom" | "gradient";
 
@@ -24,56 +24,31 @@ export type ColorConfig = {
   gradientStops: GradientStop[];
 };
 
-export type ModifierId =
-  | "minimal"
-  | "smooth"
-  | "sharp"
-  | "geometric"
-  | "organic"
-  | "bold"
-  | "elegant";
+export type ShapeCategory =
+  | "food"
+  | "animals"
+  | "people"
+  | "objects"
+  | "nature"
+  | "symbols";
 
-export type ModifierConfig = {
-  curvature: number;
-  sharpness: number;
-  exaggeration: number;
-  simplification: number;
-  symmetry: number;
-  thickness: number;
-};
-
-export type SilhouetteStyleId =
-  | "wave"
-  | "mountain"
-  | "city"
-  | "palm"
-  | "heart"
-  | "tree"
-  | "crown"
-  | "coffee"
-  | "star"
-  | "whale";
-
-export type SilhouetteDefinition = {
+// A filled silhouette the barcode bars are masked into.
+export type ShapeDef = {
   id: string;
   label: string;
-  buildPath: (
-    width: number,
-    height: number,
-    modifier: ModifierConfig
-  ) => string;
-};
-
-export type RenderedSilhouette = {
-  styleId: string;
-  modifierId: ModifierId;
-  path: string;
+  category: ShapeCategory;
+  // Tight bounding box of the paths: [minX, minY, width, height].
+  viewBox: [number, number, number, number];
+  paths: string[];
+  fillRule?: "nonzero" | "evenodd";
+  source: "phosphor" | "game-icons";
+  // One or two sentences for the shape's landing page.
+  description: string;
 };
 
 // A complete look: what templates and the AI generator both produce.
 export type StylePreset = {
-  style: SilhouetteStyleId;
-  modifier: ModifierId;
+  shape: string;
   color: string;
 };
 

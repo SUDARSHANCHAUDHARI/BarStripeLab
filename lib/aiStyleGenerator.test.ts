@@ -21,8 +21,7 @@ vi.mock("@anthropic-ai/sdk", async (importOriginal) => {
 
 import Anthropic from "@anthropic-ai/sdk";
 import { AIStyleError, AI_MODEL, generateAIStyle, parseStylePreset } from "./aiStyleGenerator";
-import { STYLE_IDS } from "./styles";
-import { MODIFIER_IDS } from "./artEngine";
+import { SHAPE_IDS } from "./shapes";
 import { templates } from "./templates";
 
 function textResponse(text: string, stop_reason = "end_turn") {
@@ -35,38 +34,35 @@ beforeEach(() => {
 });
 
 describe("parseStylePreset", () => {
-  it("accepts a known style, modifier and hex color", () => {
-    expect(parseStylePreset('{"style":"coffee","modifier":"organic","color":"#6F4E37"}')).toEqual({
-      style: "coffee",
-      modifier: "organic",
+  it("accepts a known shape and hex color", () => {
+    expect(parseStylePreset('{"shape":"coffee","color":"#6F4E37"}')).toEqual({
+      shape: "coffee",
       color: "#6F4E37",
     });
   });
 
-  it("rejects unknown ids, non-hex colors and invalid JSON", () => {
-    expect(() => parseStylePreset('{"style":"rocket","modifier":"smooth","color":"#000000"}')).toThrow(AIStyleError);
-    expect(() => parseStylePreset('{"style":"wave","modifier":"wobbly","color":"#000000"}')).toThrow(AIStyleError);
-    expect(() => parseStylePreset('{"style":"wave","modifier":"smooth","color":"red\\"/>"}')).toThrow(AIStyleError);
+  it("rejects unknown shapes, non-hex colors and invalid JSON", () => {
+    expect(() => parseStylePreset('{"shape":"rocket-ship-xyz","color":"#000000"}')).toThrow(AIStyleError);
+    expect(() => parseStylePreset('{"shape":"coffee","color":"red\\"/>"}')).toThrow(AIStyleError);
     expect(() => parseStylePreset("not json")).toThrow(AIStyleError);
   });
 });
 
 describe("generateAIStyle", () => {
   it("sends the viewer's key from the browser with a constrained schema", async () => {
-    create.mockResolvedValue(textResponse('{"style":"whale","modifier":"elegant","color":"#0077BE"}'));
+    create.mockResolvedValue(textResponse('{"shape":"heart","color":"#C9184A"}'));
 
-    const preset = await generateAIStyle("seaside surf shop", "sk-ant-test");
+    const preset = await generateAIStyle("wedding stationery", "sk-ant-test");
 
-    expect(preset).toEqual({ style: "whale", modifier: "elegant", color: "#0077BE" });
+    expect(preset).toEqual({ shape: "heart", color: "#C9184A" });
     expect(constructorArgs[0]).toEqual({ apiKey: "sk-ant-test", dangerouslyAllowBrowser: true });
 
     const params = create.mock.calls[0][0];
     expect(params.model).toBe(AI_MODEL);
     expect(params.fallbacks).toBe("default");
     expect(params.betas).toEqual(["server-side-fallback-2026-07-01"]);
-    expect(params.output_config.format.schema.properties.style.enum).toEqual(STYLE_IDS);
-    expect(params.output_config.format.schema.properties.modifier.enum).toEqual(MODIFIER_IDS);
-    expect(params.messages).toEqual([{ role: "user", content: "seaside surf shop" }]);
+    expect(params.output_config.format.schema.properties.shape.enum).toEqual(SHAPE_IDS);
+    expect(params.messages).toEqual([{ role: "user", content: "wedding stationery" }]);
   });
 
   it("reports refusals and truncation instead of parsing them", async () => {
@@ -86,11 +82,10 @@ describe("generateAIStyle", () => {
 });
 
 describe("templates", () => {
-  it("each template uses a real style and modifier, and no two look the same", () => {
+  it("each template uses a real shape, and no two use the same shape", () => {
     for (const t of templates) {
-      expect(STYLE_IDS).toContain(t.style);
-      expect(MODIFIER_IDS).toContain(t.modifier);
+      expect(SHAPE_IDS).toContain(t.shape);
     }
-    expect(new Set(templates.map((t) => t.style)).size).toBe(templates.length);
+    expect(new Set(templates.map((t) => t.shape)).size).toBe(templates.length);
   });
 });
