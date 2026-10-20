@@ -17,7 +17,7 @@ import Segmented from "../Segmented";
 import ExportBar from "./ExportBar";
 import NumberField from "./NumberField";
 import SizeControl from "./SizeControl";
-import { artworkSizes, formatMmShort, svgDataUri } from "./sizes";
+import { sizeSummary, svgDataUri } from "./sizes";
 import type { Rendered } from "./useDesignRender";
 import { FIELD, HINT, LABEL } from "./ui";
 
@@ -71,7 +71,7 @@ export default function AllSettings({
   const summary = composed
     ? [
         `${FORMAT_LABEL[design.format]} · ${rendered.normalized}`,
-        `${percent !== null ? `${percent}%` : `bars ${design.xMm.toFixed(2)} mm`} · ${formatMmShort(artworkSizes(composed, design.xMm).standard)} · bars thinner by ${design.bwrMm.toFixed(3)} mm`,
+        `${percent !== null ? `${percent}%` : `bars ${design.xMm.toFixed(2)} mm`} · ${sizeSummary(composed, design.xMm)} · bars thinner by ${design.bwrMm.toFixed(3)} mm`,
         `${design.retailSafe ? "Retail-safe" : "Art"}${score ? ` · scan check ${score.score}` : ""}`,
       ]
     : [detection.message];

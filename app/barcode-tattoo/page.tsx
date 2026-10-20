@@ -4,7 +4,7 @@ import Generator from "../components/Generator";
 
 const TITLE = "Barcode tattoo generator — BarStripeLab";
 const DESCRIPTION =
-  "Turn a name, a date or a lucky number into a barcode for a tattoo or a gift. Free, runs in your browser, exports SVG and PNG for your tattoo artist.";
+  "Turn a name, a date or a lucky number into a barcode for a tattoo or a gift. Free, runs in your browser, exports SVG, PDF and PNG for your tattoo artist.";
 const URL_PATH = "/barcode-tattoo";
 // A page's openGraph and twitter replace the layout's, so the image is repeated here.
 const IMAGES = [{ url: "/og-image.png", width: 1200, height: 630, alt: "Barcode tattoo artwork by BarStripeLab" }];
@@ -43,7 +43,7 @@ export default function BarcodeTattooPage() {
           Turn a birth date, a lucky number or a name into a barcode your tattoo artist can work from.
         </p>
       </div>
-      <Generator mode="art" />
+      <Generator mode="art" initialFormat="code128" />
 
       <section aria-labelledby="tattoo-tips-title" className="mt-20 space-y-5">
         <h2 id="tattoo-tips-title" className="text-[clamp(28px,3.4vw,40px)] leading-[1.1]">

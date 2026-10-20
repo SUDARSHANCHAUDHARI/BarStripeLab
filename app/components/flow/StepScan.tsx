@@ -5,7 +5,7 @@ import type { BarcodeFormat, ComposedBarcode } from "@/types";
 import { magnification } from "@/lib/printSize";
 import SizeControl from "./SizeControl";
 import StepActions from "./StepActions";
-import { artworkSizes, formatMmShort } from "./sizes";
+import { sizeSummary } from "./sizes";
 import { BTN_PRIMARY, BTN_QUIET, FOCUS, HINT, STEP_HEADING } from "./ui";
 
 interface StepScanProps {
@@ -49,7 +49,7 @@ export default function StepScan({
 }: StepScanProps) {
   const percent = magnification(format, xMm);
   const sizeName = percent !== null ? `${percent}%${percent === 100 ? ", the standard" : ""}` : `bars ${xMm.toFixed(2)} mm wide`;
-  const barcodeSize = composed ? ` (${formatMmShort(artworkSizes(composed, xMm).standard)})` : "";
+  const barcodeSize = composed ? ` (${sizeSummary(composed, xMm)})` : "";
 
   return (
     <div>
