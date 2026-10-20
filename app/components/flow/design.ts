@@ -20,14 +20,14 @@ export const shapeFor = (id: string): ShapeDef => (id === NO_SHAPE_ID ? NO_SHAPE
 
 export const SHAPE_COUNT = SHAPES.length;
 
-export function initialDesign(initialShape?: string, mode?: FlowMode): Design {
+export function initialDesign(initialShape?: string, mode?: FlowMode, initialFormat: BarcodeFormat = "ean13"): Design {
   return {
-    format: "ean13",
+    format: initialFormat,
     value: "",
     shape: initialShape && isShapeId(initialShape) ? initialShape : NO_SHAPE_ID,
     colorConfig: DEFAULT_COLOR_CONFIG,
     retailSafe: mode !== "art",
-    xMm: nominalXmm("ean13"),
+    xMm: nominalXmm(initialFormat),
     bwrMm: 0,
     panel: "coffee-bag",
   };

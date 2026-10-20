@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import type { BarcodeFormat, ComposedBarcode, ScanScore } from "@/types";
-import { magnification } from "@/lib/printSize";
+import { magnification, xRangeMm } from "@/lib/printSize";
 import { snapPngWidth } from "@/lib/export/png";
 import ShareButton from "../ShareButton";
 import {
@@ -108,6 +108,11 @@ export default function ExportBar({
   const snapped = composed ? snapPngWidth(composed, xMm, dpi).snappedXmm : xMm;
   const snapPercent = magnification(format, snapped);
   const snapMoved = Math.abs(snapped - xMm) > 0.0005;
+  // Snapping can push the bars under the smallest width scanners are specified for.
+  const minXmm = xRangeMm(format).min;
+  const belowMin = composed !== null && snapped < minXmm - 0.0005;
+  const betterDpi = composed ? PNG_DPI_OPTIONS.find((option) => snapPngWidth(composed, xMm, option).snappedXmm >= minXmm - 0.0005) : undefined;
+  const minPercent = magnification(format, minXmm);
 
   const dpiSelect = (
     <div className="flex items-center gap-2">
@@ -142,6 +147,8 @@ export default function ExportBar({
         </p>
       )}
 
+      {decode === "unavailable" && <p className="mb-4 text-base text-ink-2">Decode check unavailable in this browser.</p>}
+
       {compact ? (
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={downloadSvgNow} disabled={disabled || busy === "svg"} className={BTN_OUTLINE}>
@@ -168,7 +175,7 @@ export default function ExportBar({
             />
             <DownloadCard
               title="PDF"
-              detail="For your printer. Exact size."
+              detail="For your printer. Exact size. Colours are RGB. Ask your printer to convert to CMYK or a spot colour."
               disabled={disabled}
               busy={busy === "pdf"}
               onClick={downloadPdfNow}
@@ -189,6 +196,19 @@ export default function ExportBar({
             </p>
           )}
         </>
+      )}
+
+      {belowMin && (
+        <p role="status" className="mt-3 rounded-xl bg-warn-bg px-4 py-3 text-base text-warn">
+          <strong>The PNG is below the minimum bar width.</strong> At {dpi} dpi the bars round down to{" "}
+          {snapPercent !== null && minPercent !== null
+            ? `${snapPercent}%, below the ${minPercent}% minimum`
+            : `${snapped.toFixed(3)} mm, below the ${minXmm} mm minimum`}
+          .{" "}
+          {betterDpi
+            ? `Choose ${betterDpi} dpi or a larger size.`
+            : "Choose a larger size."}
+        </p>
       )}
 
       <div className="mt-5 flex flex-wrap items-center gap-3">

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { BTN_PRIMARY, STEP_HEADING } from "./components/flow/ui";
 
 export default function ErrorBoundary({
   error,
@@ -15,10 +16,10 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-start justify-center gap-4 px-4">
-      <h1 className="text-lg font-black uppercase text-ink">Something went wrong</h1>
-      <p className="text-muted">An unexpected error occurred. Please try again.</p>
-      <button type="button" onClick={() => reset()} className="btn px-6 py-3">
+    <main id="main" className="mx-auto flex min-h-[60vh] max-w-md flex-col items-start justify-center gap-4 px-4">
+      <h1 className={STEP_HEADING}>Something went wrong</h1>
+      <p className="text-xl text-ink-2">An unexpected error occurred. Please try again.</p>
+      <button type="button" onClick={() => reset()} className={BTN_PRIMARY}>
         Try again
       </button>
     </main>

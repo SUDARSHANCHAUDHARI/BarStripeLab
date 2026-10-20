@@ -110,7 +110,7 @@ export default function ScanCheck({ score, decode, number, colorConfig }: ScanCh
             </span>
           </p>
         )}
-        {decode === "unavailable" && <p className="text-ink-2">Scan check unavailable in this browser.</p>}
+        {decode === "unavailable" && <p className="text-ink-2">Decode check unavailable in this browser. The score above is still valid.</p>}
         {decode === "failed" && (
           <p role="alert" className="flex gap-2 rounded-xl bg-warn-bg px-4 py-3 text-warn">
             <Icon kind="warn" />

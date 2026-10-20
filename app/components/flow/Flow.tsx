@@ -34,6 +34,8 @@ interface FlowProps {
   initialShape?: string;
   // "art" starts in Art mode (the tattoo page); the default is Retail-safe.
   mode?: FlowMode;
+  // The barcode type to start with. It also counts as the user's choice, so the number is kept as typed.
+  initialFormat?: BarcodeFormat;
 }
 
 // The header opens these panels; the same names are used by the keyboard shortcut.
@@ -95,10 +97,10 @@ function AnswerList({ lines, onChange }: { lines: AnswerLine[]; onChange: (step:
   );
 }
 
-export default function Flow({ initialShape, mode }: FlowProps) {
-  const [design, setDesign] = useState<Design>(() => initialDesign(initialShape, mode));
+export default function Flow({ initialShape, mode, initialFormat }: FlowProps) {
+  const [design, setDesign] = useState<Design>(() => initialDesign(initialShape, mode, initialFormat));
   // The user's own choice of barcode type; undefined means "detect it from the number".
-  const [override, setOverride] = useState<BarcodeFormat | undefined>(undefined);
+  const [override, setOverride] = useState<BarcodeFormat | undefined>(initialFormat);
   const [step, setStep] = useState<Step>(1);
   // Furthest step reached: once the result has been seen, every edit returns straight to it.
   const [reached, setReached] = useState<Step>(1);
@@ -137,6 +139,14 @@ export default function Flow({ initialShape, mode }: FlowProps) {
     } else {
       setRestore(readLastDesign(design));
     }
+    // The header sends visitors here with ?open=<panel> from pages that have no flow (the 404 page).
+    const open = params.get("open");
+    if (open === "settings" || open === "templates" || open === "csv") {
+      setPanel(open);
+      params.delete("open");
+      const rest = params.toString();
+      window.history.replaceState(null, "", `${window.location.pathname}${rest ? `?${rest}` : ""}`);
+    }
     setUrlRead(true);
     // Runs once: `design` is the pre-URL default it is read against.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -167,8 +177,13 @@ export default function Flow({ initialShape, mode }: FlowProps) {
 
   useEffect(() => {
     const open = (event: Event) => {
-      const next = (event as CustomEvent<{ panel?: Panel }>).detail?.panel;
-      if (next === "settings" || next === "templates" || next === "csv") setPanel(next);
+      const detail = (event as CustomEvent<{ panel?: Panel; handled?: boolean }>).detail;
+      const next = detail?.panel;
+      if (next === "settings" || next === "templates" || next === "csv") {
+        setPanel(next);
+        // Tells the header a flow took it; otherwise the header navigates to the flow.
+        detail.handled = true;
+      }
     };
     const slash = (event: KeyboardEvent) => {
       if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey || isTypingTarget(event.target)) return;
@@ -251,7 +266,7 @@ export default function Flow({ initialShape, mode }: FlowProps) {
 
   function restart() {
     setDesign((prev) => ({ ...prev, value: "" }));
-    setOverride(undefined);
+    setOverride(initialFormat);
     setReached(1);
     setStep(1);
     focusNumberField();

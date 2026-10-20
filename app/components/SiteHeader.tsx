@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type Panel = "settings" | "templates" | "csv";
@@ -9,9 +10,13 @@ type NavItem =
   | { label: string; href: string }
   | { label: string; panel: Panel };
 
-// The flow listens for this event and opens the matching panel.
-const openPanel = (panel: Panel) =>
-  window.dispatchEvent(new CustomEvent("barstripelab:open", { detail: { panel } }));
+// The flow listens for this event and opens the matching panel. It marks the event handled; on a page
+// with no flow nobody does, so we go to the home page, which opens the panel from ?open=.
+function openPanel(panel: Panel, router: ReturnType<typeof useRouter>) {
+  const detail = { panel, handled: false };
+  window.dispatchEvent(new CustomEvent("barstripelab:open", { detail }));
+  if (!detail.handled) router.push(`/?open=${panel}`);
+}
 
 const ITEMS: NavItem[] = [
   { label: "Shapes", href: "/#shapes" },
@@ -24,6 +29,7 @@ const ITEM_CLASS =
   "flex min-h-[44px] items-center text-ink-2 hover:text-ink hover:underline";
 
 function NavEntry({ item, onDone }: { item: NavItem; onDone: () => void }) {
+  const router = useRouter();
   if ("href" in item) {
     return (
       <Link href={item.href} onClick={onDone} className={ITEM_CLASS}>
@@ -36,7 +42,7 @@ function NavEntry({ item, onDone }: { item: NavItem; onDone: () => void }) {
       type="button"
       onClick={() => {
         onDone();
-        openPanel(item.panel);
+        openPanel(item.panel, router);
       }}
       className={`${ITEM_CLASS} text-left`}
     >
@@ -46,6 +52,7 @@ function NavEntry({ item, onDone }: { item: NavItem; onDone: () => void }) {
 }
 
 export default function SiteHeader() {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = () => setMenuOpen(false);
 
@@ -78,7 +85,7 @@ export default function SiteHeader() {
         <div className="ml-auto flex items-center gap-2 xl:ml-0">
           <button
             type="button"
-            onClick={() => openPanel("settings")}
+            onClick={() => openPanel("settings", router)}
             aria-keyshortcuts="/"
             className="flex min-h-[44px] items-center gap-2 rounded-full border-[1.5px] border-ink px-4 font-mono text-[15px] font-medium text-ink hover:bg-card"
           >
