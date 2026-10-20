@@ -10,7 +10,8 @@ import { detectFormat } from "@/lib/formatDetect";
 import { scanScore } from "@/lib/scanScore";
 import { NO_SHAPE, shapeFor } from "./design";
 
-export type DecodeState = "checking" | "ok" | "failed";
+// "unavailable": the browser could not rasterise the SVG, which says nothing about the barcode.
+export type DecodeState = "checking" | "ok" | "failed" | "unavailable";
 
 export type Rendered = {
   // The number that was drawn (check digit added), null when the input is unusable.
@@ -75,15 +76,14 @@ export function useDesignRender(design: Design, enabled: boolean): Rendered {
       if (cancelled) return;
       setRendered({ normalized, shapeId: shape, composed, plain, score, decode: "checking", error: "" });
 
-      let decoded: string | null = null;
+      let decode: DecodeState;
       try {
-        decoded = await decodeComposed(composed, format);
+        decode = (await decodeComposed(composed, format)) === normalized ? "ok" : "failed";
       } catch (err) {
         console.error("Decode error:", err);
+        decode = "unavailable";
       }
-      if (!cancelled) {
-        setRendered((prev) => ({ ...prev, decode: decoded === normalized ? "ok" : "failed" }));
-      }
+      if (!cancelled) setRendered((prev) => ({ ...prev, decode }));
     }, DEBOUNCE_MS);
 
     return () => {

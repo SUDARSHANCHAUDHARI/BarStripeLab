@@ -21,6 +21,17 @@ const MAX_FILE_BYTES = 1_000_000;
 // Let the browser paint between barcodes so the progress count moves.
 const nextFrame = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
+// A first row with no digits (a "gtin" heading) is dropped when the rows after it are numeric.
+// It is blanked, not removed, so the line numbers in the skipped list still match the user's file.
+function skipHeaderRow(text: string): string {
+  const lines = text.split(/\r?\n/);
+  const first = lines.findIndex((line) => line.trim() !== "");
+  if (first === -1 || /\d/.test(lines[first])) return text;
+  const rest = lines.slice(first + 1).filter((line) => line.trim() !== "");
+  const numeric = rest.length > 0 && rest.every((line) => /^[\d\s,;-]+/.test(line.trim()));
+  return numeric ? lines.map((line, index) => (index === first ? "" : line)).join("\n") : text;
+}
+
 const fileStem = (value: string) => value.replace(/[^A-Za-z0-9]+/g, "_").replace(/^_|_$/g, "") || "barcode";
 
 // Shown inside a Modal. Everything happens in the browser; the ZIP is built from the user's own list.
@@ -30,7 +41,7 @@ export default function BatchDialog({ design }: BatchDialogProps) {
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState("");
 
-  const parsed = useMemo(() => parseBatch(text), [text]);
+  const parsed = useMemo(() => parseBatch(skipHeaderRow(text)), [text]);
   const busy = progress !== null;
 
   async function readFile(file: File | undefined) {
