@@ -1,6 +1,6 @@
 "use client";
 
-import { COLOR_PRESETS, lowestBarContrast, safeColor } from "@/lib/colorEngine";
+import { COLOR_PRESETS, failsRedLight, lowestBarContrast, safeColor } from "@/lib/colorEngine";
 import type { ColorConfig } from "@/types";
 import Segmented from "./Segmented";
 
@@ -134,7 +134,15 @@ export default function ColorPanel({ colorConfig, setColorConfig }: ColorPanelPr
         </div>
       )}
 
-      {lowestBarContrast(colorConfig) < 3 && (
+      {failsRedLight(colorConfig) && (
+        <p role="status" className="notice">
+          <strong className="font-black uppercase">Invisible to laser scanners.</strong> Red, orange
+          and pink bars look white under the red light checkout scanners use. Pick black, navy,
+          dark green or another color with little red.
+        </p>
+      )}
+
+      {!failsRedLight(colorConfig) && lowestBarContrast(colorConfig) < 3 && (
         <p role="status" className="notice">
           <strong className="font-black uppercase">Low contrast.</strong> Light bars may not scan.
           Pick a darker color so the bars stand out clearly from the white background.

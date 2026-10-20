@@ -2,6 +2,7 @@ import type { BarcodeFormat, ColorConfig, ShapeDef } from "@/types";
 import { extractColumns } from "@/lib/columnMapper";
 import { buildGradientDef, buildPaintValue } from "@/lib/colorEngine";
 import { BARCODE_SCALE } from "@/lib/barcode";
+import { minBarHeightModules } from "@/lib/gs1";
 
 // Layout ratios, relative to the layout base (see ART_BASE_MAX_MODULES).
 const TOP_PAD_RATIO = 0.04;
@@ -12,8 +13,10 @@ const ART_MAX_RATIO = 1.5;
 // that would print a 48-char label poster-tall, so the art (and text) scale
 // with at most 2x an EAN-13 (95 modules) and a wide shape spreads sideways.
 const ART_BASE_MAX_MODULES = 190;
-// Protected band at the bottom: every bar is drawn in full here. Always
-// relative to the full bar width: readers want >= 15% of it in bar height.
+// Protected band at the bottom: every bar is drawn in full here. Art mode keeps
+// it at 16% of the bar width, far below the GS1 minimum bar height (truncated:
+// phone apps read it, strict checkout scanners may not). Retail-safe mode
+// raises it to the GS1 minimum (lib/gs1.ts).
 const SCAN_ZONE_RATIO = 0.16;
 const LABEL_ZONE_RATIO = 0.13;
 const LABEL_FONT_RATIO = 0.72;
@@ -38,6 +41,8 @@ export type ComposeOptions = {
   format: BarcodeFormat;
   // Unique per SVG on a page, so masks and gradients do not collide.
   idPrefix?: string;
+  // Keep every bar at the GS1 minimum height and draw the art above it.
+  retailSafe?: boolean;
 };
 
 function escapeXml(value: string): string {
@@ -118,6 +123,7 @@ export function composeBarcodeSvg({
   value,
   format,
   idPrefix = "bsl",
+  retailSafe = false,
 }: ComposeOptions): string {
   const barsWidth = parseWidth(rawBarcodeSvg);
   const quietLeft = QUIET_ZONE_MODULES[format].left * BARCODE_SCALE;
@@ -137,12 +143,16 @@ export function composeBarcodeSvg({
   // the shape fills the width or the height. Its bottom sits inside the band.
   const [vbX, vbY, vbW, vbH] = shape.viewBox;
   const top = base * TOP_PAD_RATIO;
-  const zoneHeight = barsWidth * SCAN_ZONE_RATIO;
+  const artZoneHeight = barsWidth * SCAN_ZONE_RATIO;
+  const retailZoneHeight =
+    minBarHeightModules(format, barsWidth / BARCODE_SCALE) * BARCODE_SCALE;
+  const zoneHeight = retailSafe ? Math.max(artZoneHeight, retailZoneHeight) : artZoneHeight;
   const boxHeight = Math.min(
     Math.max((barsWidth * vbH) / vbW, base * ART_MIN_RATIO),
     base * ART_MAX_RATIO
   );
-  const zoneY = top + boxHeight - zoneHeight * SHAPE_OVERLAP_RATIO;
+  // The overlap stays the art-mode size so a taller band doesn't swallow the shape.
+  const zoneY = top + boxHeight - artZoneHeight * SHAPE_OVERLAP_RATIO;
   const totalHeight = zoneY + zoneHeight + labelHeight;
 
   // Fit the shape inside the art box, centred, standing on the scan zone.

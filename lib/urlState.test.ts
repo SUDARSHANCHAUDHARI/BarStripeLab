@@ -7,12 +7,14 @@ const base: Design = {
   value: "5901234123457",
   shape: SHAPE_IDS[0],
   colorConfig: DEFAULT_COLOR_CONFIG,
+  retailSafe: false,
 };
 
 describe("urlState", () => {
   it("round-trips preset, custom and gradient designs", () => {
     const designs: Design[] = [
       { ...base, format: "code128", value: "AB 12&x", shape: SHAPE_IDS[SHAPE_IDS.length - 1] },
+      { ...base, retailSafe: true },
       { ...base, colorConfig: { ...DEFAULT_COLOR_CONFIG, mode: "preset", presetId: "ocean_blue" } },
       { ...base, colorConfig: { ...DEFAULT_COLOR_CONFIG, mode: "custom", solidColor: "#1db954" } },
       {

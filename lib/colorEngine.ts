@@ -1,11 +1,13 @@
 import type { ColorConfig, GradientStop } from "@/types";
 
+// Every preset must stay dark under red light (see failsRedLight): orange and
+// pink look white to red-laser checkout scanners.
 export const COLOR_PRESETS: Record<string, string> = {
   classic_black: "#000000",
-  sunset_orange: "#ff6b35",
+  ink_navy: "#14202e",
   ocean_blue: "#0077be",
   forest_green: "#2d6a4f",
-  neon_pink: "#ff006e",
+  deep_teal: "#0b5563",
   royal_purple: "#5a189a",
 };
 
@@ -97,4 +99,26 @@ export function lowestBarContrast(config: ColorConfig): number {
       ? normalizeStops(config.gradientStops).map((stop) => stop.color)
       : [getSolidColor(config)];
   return Math.min(...colors.map(contrastWithWhite));
+}
+
+// Checkout scanners read bars under red light (~660 nm), where a bar's
+// reflectance is roughly its linear red channel. ISO/IEC 15416 needs the
+// darkest element to reflect at most half of what the paper does.
+// shortcut: screen RGB stands in for ink reflectance; a print verifier is the real test.
+const RED_LIGHT_MAX_REFLECTANCE = 0.5;
+
+export function redLightReflectance(color: string): number {
+  const digits = safeColor(color).slice(1);
+  const red = digits.length <= 4 ? digits[0] + digits[0] : digits.slice(0, 2);
+  const channel = parseInt(red, 16) / 255;
+  return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+}
+
+// True when any bar color (each gradient stop) would vanish for a red laser.
+export function failsRedLight(config: ColorConfig): boolean {
+  const colors =
+    config.mode === "gradient"
+      ? normalizeStops(config.gradientStops).map((stop) => stop.color)
+      : [getSolidColor(config)];
+  return colors.some((color) => redLightReflectance(color) > RED_LIGHT_MAX_REFLECTANCE);
 }

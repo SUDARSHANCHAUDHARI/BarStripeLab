@@ -7,6 +7,7 @@ export type Design = {
   value: string;
   shape: string;
   colorConfig: ColorConfig;
+  retailSafe: boolean;
 };
 
 export const DEFAULT_COLOR_CONFIG: ColorConfig = {
@@ -75,6 +76,7 @@ export function encodeDesign(design: Design): string {
     v: design.value,
     s: design.shape,
     c: encodeColor(design.colorConfig),
+    r: design.retailSafe ? "1" : "0",
   }).toString();
 }
 
@@ -85,11 +87,13 @@ export function decodeDesign(search: string, fallback: Design): Design {
   const v = params.get("v");
   const s = params.get("s");
   const c = params.get("c");
+  const r = params.get("r");
 
   return {
     format: FORMATS.find((format) => format === f) ?? fallback.format,
     value: v === null ? fallback.value : v.slice(0, MAX_VALUE_LENGTH),
     shape: s !== null && isShapeId(s) ? s : fallback.shape,
     colorConfig: c ? decodeColor(c, fallback.colorConfig) : fallback.colorConfig,
+    retailSafe: r === "1" ? true : r === "0" ? false : fallback.retailSafe,
   };
 }

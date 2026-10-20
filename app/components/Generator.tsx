@@ -21,6 +21,12 @@ import ColorPanel from "./ColorPanel";
 import ShareButton, { shareApp } from "./ShareButton";
 import KeyboardShortcutsInfo from "./KeyboardShortcutsInfo";
 import { FORMAT_INFO } from "./formats";
+import Segmented from "./Segmented";
+
+const SCAN_MODE_OPTIONS: { value: "art" | "retail"; label: string }[] = [
+  { value: "art", label: "Art" },
+  { value: "retail", label: "Retail-safe" },
+];
 
 const PRESET_IDS = Object.keys(COLOR_PRESETS);
 const DEFAULT_SHAPE = isShapeId("coffee") ? "coffee" : SHAPE_IDS[0];
@@ -36,6 +42,7 @@ export default function Generator({ initialShape }: GeneratorProps) {
     value: "5901234123457",
     shape: initialShape && isShapeId(initialShape) ? initialShape : DEFAULT_SHAPE,
     colorConfig: DEFAULT_COLOR_CONFIG,
+    retailSafe: false,
   });
   // The query string is read after mount so the static HTML and the first client render match.
   const [urlRead, setUrlRead] = useState(false);
@@ -45,7 +52,7 @@ export default function Generator({ initialShape }: GeneratorProps) {
   const [error, setError] = useState("");
   const [exportError, setExportError] = useState("");
 
-  const { format, value, shape, colorConfig } = design;
+  const { format, value, shape, colorConfig, retailSafe } = design;
   const patch = (changes: Partial<Design>) => setDesign((prev) => ({ ...prev, ...changes }));
 
   useEffect(() => {
@@ -87,6 +94,7 @@ export default function Generator({ initialShape }: GeneratorProps) {
           colorConfig,
           value: normalized,
           format,
+          retailSafe,
         });
 
         if (!cancelled) setComposedSvg(finalSvg);
@@ -105,7 +113,7 @@ export default function Generator({ initialShape }: GeneratorProps) {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [value, format, shape, colorConfig]);
+  }, [value, format, shape, colorConfig, retailSafe]);
 
   function applyPreset(preset: StylePreset): void {
     setDesign((prev) => ({
@@ -196,6 +204,20 @@ export default function Generator({ initialShape }: GeneratorProps) {
         />
 
         <ShapeGrid shape={shape} setShape={(next) => patch({ shape: next })} />
+
+        <div>
+          <Segmented
+            label="Scan mode"
+            options={SCAN_MODE_OPTIONS}
+            value={retailSafe ? "retail" : "art"}
+            onChange={(mode) => patch({ retailSafe: mode === "retail" })}
+          />
+          <p className="mt-2 text-xs text-muted">
+            {retailSafe
+              ? "Retail-safe: every bar keeps the GS1 minimum height for checkout scanners; the shape sits on top."
+              : "Art: more shape, shorter bars. Phone apps read it; strict checkout scanners may reject it."}
+          </p>
+        </div>
 
         <ColorPanel
           colorConfig={colorConfig}
