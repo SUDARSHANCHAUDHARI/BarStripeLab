@@ -29,7 +29,7 @@ const mono = localFont({
 });
 
 const TITLE = "BarStripeLab — Shape Barcode Generator";
-const DESCRIPTION = `Turn EAN-13, EAN-8, UPC-A and Code 128 barcodes into ${SHAPES.length} shapes that still scan. Free, runs in your browser, exports SVG and PNG. Optional AI styling with your own Anthropic key.`;
+const DESCRIPTION = `Turn EAN-13, EAN-8, UPC-A and Code 128 barcodes into ${SHAPES.length} shapes, each with a protected scan band. Free, runs in your browser, exports SVG, PDF and PNG. Optional AI styling with your own Anthropic key.`;
 const OG_IMAGE = {
   url: "/og-image.png",
   width: 1200,

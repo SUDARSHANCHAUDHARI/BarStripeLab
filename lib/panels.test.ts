@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
+import { generateBarcodeSVG } from "@/lib/barcode";
 import { PANELS, placeOnPanel } from "@/lib/panels";
+import { sizeMm } from "@/lib/printSize";
+import { SHAPES } from "@/lib/shapes";
+import { composeBarcode } from "@/lib/svgComposer";
+import { DEFAULT_COLOR_CONFIG } from "@/lib/urlState";
 
-// EAN-13 at 100%: 113 modules x 0.33 mm wide, 25.93 mm tall; a shape adds up to ~16 mm.
+// EAN-13 at 100%: 113 modules x 0.33 mm wide, 25.93 mm tall.
 const EAN13 = { widthMm: 37.29, heightMm: 25.93 };
-const EAN13_WITH_SHAPE = { widthMm: 37.29, heightMm: 41.2 };
 
 describe("PANELS", () => {
   it("has the four product panels", () => {
@@ -19,10 +23,25 @@ describe("PANELS", () => {
     }
   });
 
-  it("fits EAN-13 at 100%, with and without a shape, in every slot", () => {
-    for (const panel of PANELS) {
-      expect(placeOnPanel(panel, EAN13).fits).toBe(true);
-      expect(placeOnPanel(panel, EAN13_WITH_SHAPE).fits).toBe(true);
+  it("fits EAN-13 at 100% with every shape, in both modes, in every slot", async () => {
+    const xMm = 0.33;
+    const rawBarcodeSvg = await generateBarcodeSVG("5901234123457", "ean13");
+    for (const shape of SHAPES) {
+      for (const retailSafe of [false, true]) {
+        const { viewBox } = composeBarcode({
+          rawBarcodeSvg,
+          shape,
+          colorConfig: DEFAULT_COLOR_CONFIG,
+          value: "5901234123457",
+          format: "ean13",
+          retailSafe,
+          xMm,
+        });
+        const artwork = { widthMm: sizeMm(viewBox.width, xMm), heightMm: sizeMm(viewBox.height, xMm) };
+        for (const panel of PANELS) {
+          expect(placeOnPanel(panel, artwork).fits, `${shape.id} retailSafe=${retailSafe} on ${panel.id}`).toBe(true);
+        }
+      }
     }
   });
 
