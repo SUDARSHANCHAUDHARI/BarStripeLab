@@ -4,7 +4,10 @@ export async function svgToPngBlob(svg: string, width = 2400): Promise<Blob> {
   const aspect = viewBox && viewBox[2] ? viewBox[3] / viewBox[2] : 1;
   const height = Math.round(width * aspect);
 
-  const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+  // A viewBox-only SVG has no intrinsic size: Firefox will not draw it to a
+  // canvas and Safari rasterises it small, then upscales (blurry bars).
+  const sized = svg.replace(/^<svg(?![^>]*\swidth=)/, `<svg width="${width}" height="${height}"`);
+  const url = URL.createObjectURL(new Blob([sized], { type: "image/svg+xml" }));
   try {
     const image = new Image();
     image.decoding = "async";

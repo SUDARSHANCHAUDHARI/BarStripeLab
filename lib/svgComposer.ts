@@ -3,12 +3,22 @@ import { extractColumns } from "@/lib/columnMapper";
 import { buildGradientDef, buildPaintValue } from "@/lib/colorEngine";
 import { BARCODE_SCALE } from "@/lib/barcode";
 
-// Layout ratios, relative to the width of the bars.
+// Layout ratios, relative to the layout base (see ART_BASE_MAX_MODULES).
 const TOP_PAD_RATIO = 0.04;
-const ART_HEIGHT_RATIO = 1.15;
-// Protected band at the bottom: every bar is drawn in full here.
+// The art box follows the shape's aspect within these bounds.
+const ART_MIN_RATIO = 0.55;
+const ART_MAX_RATIO = 1.5;
+// Long Code 128 values give bars up to ~560 modules wide. Scaling the art with
+// that would print a 48-char label poster-tall, so the art (and text) scale
+// with at most 2x an EAN-13 (95 modules) and a wide shape spreads sideways.
+const ART_BASE_MAX_MODULES = 190;
+// Protected band at the bottom: every bar is drawn in full here. Always
+// relative to the full bar width: readers want >= 15% of it in bar height.
 const SCAN_ZONE_RATIO = 0.16;
 const LABEL_ZONE_RATIO = 0.13;
+const LABEL_FONT_RATIO = 0.72;
+// Monospace glyph advance per font-size unit.
+const GLYPH_WIDTH_RATIO = 0.62;
 // How far the shape reaches down into the scan zone so the two join.
 const SHAPE_OVERLAP_RATIO = 0.35;
 
@@ -97,7 +107,7 @@ function buildDigits(
     ].join("");
   }
 
-  const fitWidth = Math.min(barsWidth, value.length * size * 0.62);
+  const fitWidth = Math.min(barsWidth, value.length * size * GLYPH_WIDTH_RATIO);
   return buildText(value, barsX + barsWidth / 2, baselineY, size, fitWidth);
 }
 
@@ -114,16 +124,28 @@ export function composeBarcodeSvg({
   const quietRight = QUIET_ZONE_MODULES[format].right * BARCODE_SCALE;
   const totalWidth = quietLeft + barsWidth + quietRight;
 
-  const top = barsWidth * TOP_PAD_RATIO;
-  const artHeight = barsWidth * ART_HEIGHT_RATIO;
+  const base = Math.min(barsWidth, ART_BASE_MAX_MODULES * BARCODE_SCALE);
+  const text = value.trim();
+  // Code 128 text shrinks to fit the bars instead of squashing its glyphs.
+  const fontSize = Math.min(
+    base * LABEL_ZONE_RATIO * LABEL_FONT_RATIO,
+    format === "code128" ? barsWidth / (text.length * GLYPH_WIDTH_RATIO) : Infinity
+  );
+  const labelHeight = fontSize / LABEL_FONT_RATIO;
+
+  // The art box takes the shape's aspect at full bar width, within bounds, so
+  // the shape fills the width or the height. Its bottom sits inside the band.
+  const [vbX, vbY, vbW, vbH] = shape.viewBox;
+  const top = base * TOP_PAD_RATIO;
   const zoneHeight = barsWidth * SCAN_ZONE_RATIO;
-  const labelHeight = barsWidth * LABEL_ZONE_RATIO;
-  const zoneY = top + artHeight;
+  const boxHeight = Math.min(
+    Math.max((barsWidth * vbH) / vbW, base * ART_MIN_RATIO),
+    base * ART_MAX_RATIO
+  );
+  const zoneY = top + boxHeight - zoneHeight * SHAPE_OVERLAP_RATIO;
   const totalHeight = zoneY + zoneHeight + labelHeight;
 
   // Fit the shape inside the art box, centred, standing on the scan zone.
-  const [vbX, vbY, vbW, vbH] = shape.viewBox;
-  const boxHeight = artHeight + zoneHeight * SHAPE_OVERLAP_RATIO;
   const scale = Math.min(barsWidth / vbW, boxHeight / vbH);
   const shapeX = quietLeft + (barsWidth - vbW * scale) / 2 - vbX * scale;
   const shapeY = top + boxHeight - vbH * scale - vbY * scale;
@@ -136,14 +158,12 @@ export function composeBarcodeSvg({
     .join("");
 
   // All bars as one path, so a gradient spans the whole barcode.
-  const barHeight = artHeight + zoneHeight;
+  const barHeight = zoneY + zoneHeight - top;
   const barsPath = extractColumns(rawBarcodeSvg)
-    .filter((column) => column.isBlack)
-    .map((column) => {
-      const x = quietLeft + (column.x / 100) * barsWidth;
-      const w = (column.width / 100) * barsWidth;
-      return `M${fmt(x)} ${fmt(top)}h${fmt(w)}v${fmt(barHeight)}h${fmt(-w)}Z`;
-    })
+    .map(
+      (column) =>
+        `M${fmt(quietLeft + column.x)} ${fmt(top)}h${fmt(column.width)}v${fmt(barHeight)}h${fmt(-column.width)}Z`
+    )
     .join("");
 
   const maskId = `${idPrefix}-mask`;
@@ -151,12 +171,12 @@ export function composeBarcodeSvg({
   const paint = buildPaintValue(colorConfig, gradientId);
   const gradientDef = buildGradientDef(colorConfig, gradientId);
   const digits = buildDigits(
-    value.trim(),
+    text,
     format,
     quietLeft,
     barsWidth,
     zoneY + zoneHeight + labelHeight * 0.78,
-    labelHeight * 0.72
+    fontSize
   );
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${fmt(totalWidth)} ${fmt(totalHeight)}" role="img" aria-label="${escapeXml(`${shape.label} barcode ${value}`)}">
