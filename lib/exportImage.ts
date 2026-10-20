@@ -1,5 +1,5 @@
-// Browser-only: rasterise a composed barcode SVG straight to PNG.
-export async function svgToPngBlob(svg: string, width = 2400): Promise<Blob> {
+// Browser-only: rasterise a composed barcode SVG onto a white canvas.
+export async function svgToCanvas(svg: string, width: number): Promise<HTMLCanvasElement> {
   const viewBox = svg.match(/viewBox="([^"]+)"/)?.[1].trim().split(/\s+/).map(Number);
   const aspect = viewBox && viewBox[2] ? viewBox[3] / viewBox[2] : 1;
   const height = Math.round(width * aspect);
@@ -25,11 +25,16 @@ export async function svgToPngBlob(svg: string, width = 2400): Promise<Blob> {
     context.fillStyle = "#ffffff";
     context.fillRect(0, 0, width, height);
     context.drawImage(image, 0, 0, width, height);
-
-    return await new Promise<Blob>((resolve, reject) =>
-      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("PNG encoding failed"))), "image/png")
-    );
+    return canvas;
   } finally {
     URL.revokeObjectURL(url);
   }
+}
+
+// Browser-only: rasterise a composed barcode SVG straight to PNG.
+export async function svgToPngBlob(svg: string, width = 2400): Promise<Blob> {
+  const canvas = await svgToCanvas(svg, width);
+  return await new Promise<Blob>((resolve, reject) =>
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("PNG encoding failed"))), "image/png")
+  );
 }
