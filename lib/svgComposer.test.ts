@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import type { BarcodeFormat, ColorConfig, ShapeDef } from "@/types";
 import { generateBarcodeSVG, BARCODE_SCALE } from "./barcode";
-import { composeBarcodeSvg } from "./svgComposer";
+import { composeBarcode, composeBarcodeSvg } from "./svgComposer";
+import { sizeMm } from "./printSize";
 import { safeColor, buildGradientDef } from "./colorEngine";
 import { SHAPES } from "./shapes";
 
@@ -182,5 +183,55 @@ describe("lowestBarContrast", () => {
         gradientStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#eeeeee" }],
       })
     ).toBeLessThan(1.3);
+  });
+});
+
+describe("print size and bar width reduction", () => {
+  async function layout(value: string, format: BarcodeFormat, extra: { xMm?: number; bwrMm?: number; retailSafe?: boolean } = {}) {
+    const raw = await generateBarcodeSVG(value, format);
+    return composeBarcode({ rawBarcodeSvg: raw, shape: SHAPES[0], colorConfig: baseColor, value, format, ...extra });
+  }
+  const rootSize = (svg: string) => svg.match(/^<svg[^>]*>/)![0].match(/ width="([^"]+)" height="([^"]+)"/)?.slice(1);
+
+  it("states the GS1 standard size of an EAN-13 at 100%", async () => {
+    const composed = await layout("5901234123457", "ean13", { xMm: 0.33 });
+    expect(sizeMm(composed.standardSize.width, 0.33)).toBeCloseTo(37.29, 2);
+    expect(Math.abs(sizeMm(composed.standardSize.height, 0.33) - 25.93)).toBeLessThanOrEqual(0.3);
+  });
+
+  it("sets the SVG width and height in mm only when a print size is given", async () => {
+    const composed = await layout("5901234123457", "ean13", { xMm: 0.33 });
+    const [w, h] = rootSize(composed.svg)!;
+    expect(w).toMatch(/mm$/);
+    expect(parseFloat(w)).toBeCloseTo(sizeMm(composed.viewBox.width, 0.33), 3);
+    expect(parseFloat(h)).toBeCloseTo(sizeMm(composed.viewBox.height, 0.33), 3);
+    expect(rootSize((await layout("5901234123457", "ean13")).svg)).toBeUndefined();
+  });
+
+  it("makes bars thinner around the same centre", async () => {
+    const plain = await layout("5901234123457", "ean13", { xMm: 0.33 });
+    const thin = await layout("5901234123457", "ean13", { xMm: 0.33, bwrMm: 0.033 });
+    expect(thin.bars).toHaveLength(plain.bars.length);
+    thin.bars.forEach((bar, i) => {
+      expect(bar.width).toBeCloseTo(plain.bars[i].width - 0.2, 6);
+      expect(bar.x + bar.width / 2).toBeCloseTo(plain.bars[i].x + plain.bars[i].width / 2, 6);
+    });
+  });
+
+  it("never makes a bar narrower than 1 SVG unit", async () => {
+    const plain = await layout("HELLO", "code128", { xMm: 0.19 });
+    const thin = await layout("HELLO", "code128", { xMm: 0.19, bwrMm: 0.1 });
+    thin.bars.forEach((bar, i) => {
+      expect(bar.width).toBeGreaterThanOrEqual(1);
+      expect(bar.x + bar.width / 2).toBeCloseTo(plain.bars[i].x + plain.bars[i].width / 2, 6);
+    });
+  });
+
+  it("gives Retail-safe Code 128 the 6.35 mm floor when it beats 15% of length", async () => {
+    const xMm = 0.25;
+    const composed = await layout("ABC", "code128", { xMm, retailSafe: true });
+    const floor = (6.35 / xMm) * BARCODE_SCALE;
+    expect(floor).toBeGreaterThan(0.15 * composed.viewBox.width);
+    expect(composed.band.height).toBeGreaterThanOrEqual(floor - 1e-6);
   });
 });

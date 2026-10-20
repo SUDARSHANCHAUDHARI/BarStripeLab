@@ -2,7 +2,8 @@ import type { BarRect, BarcodeFormat, ColorConfig, ComposedBarcode, DigitText, S
 import { extractColumns } from "@/lib/columnMapper";
 import { buildGradientDef, buildPaintValue } from "@/lib/colorEngine";
 import { BARCODE_SCALE } from "@/lib/barcode";
-import { minBarHeightModules } from "@/lib/gs1";
+import { HRI_ZONE_MODULES, QUIET_ZONE_MODULES, minBarHeightModules } from "@/lib/gs1";
+import { nominalXmm, sizeMm } from "@/lib/printSize";
 
 // Layout ratios, relative to the layout base (see ART_BASE_MAX_MODULES).
 const TOP_PAD_RATIO = 0.04;
@@ -25,13 +26,8 @@ const GLYPH_WIDTH_RATIO = 0.62;
 // How far the shape reaches down into the scan zone so the two join.
 const SHAPE_OVERLAP_RATIO = 0.35;
 
-// Minimum blank margins in modules (GS1 for EAN/UPC, ISO/IEC 15417 for Code 128).
-const QUIET_ZONE_MODULES: Record<BarcodeFormat, { left: number; right: number }> = {
-  ean13: { left: 11, right: 7 },
-  ean8: { left: 7, right: 7 },
-  upca: { left: 9, right: 9 },
-  code128: { left: 10, right: 10 },
-};
+// Thinned bars keep at least this width in SVG units (half a module).
+const MIN_BAR_UNITS = 1;
 
 export type ComposeOptions = {
   rawBarcodeSvg: string;
@@ -43,9 +39,9 @@ export type ComposeOptions = {
   idPrefix?: string;
   // Keep every bar at the GS1 minimum height and draw the art above it.
   retailSafe?: boolean;
-  // Module width in mm: sets the SVG's physical width/height (Task 1).
+  // Module width in mm: sets the SVG's physical width/height.
   xMm?: number;
-  // Bars thinner by this many mm, centres kept, for ink spread (Task 1).
+  // Bars thinner by this many mm, centres kept, for ink spread.
   bwrMm?: number;
 };
 
@@ -122,6 +118,8 @@ export function composeBarcode({
   format,
   idPrefix = "bsl",
   retailSafe = false,
+  xMm,
+  bwrMm = 0,
 }: ComposeOptions): ComposedBarcode {
   const barsWidth = parseWidth(rawBarcodeSvg);
   const quietLeft = QUIET_ZONE_MODULES[format].left * BARCODE_SCALE;
@@ -135,7 +133,9 @@ export function composeBarcode({
     base * LABEL_ZONE_RATIO * LABEL_FONT_RATIO,
     format === "code128" ? barsWidth / (text.length * GLYPH_WIDTH_RATIO) : Infinity
   );
-  const labelHeight = fontSize / LABEL_FONT_RATIO;
+  // EAN/UPC digits get the GS1 zone so the standard size matches GS1.
+  const labelHeight =
+    format === "code128" ? fontSize / LABEL_FONT_RATIO : HRI_ZONE_MODULES * BARCODE_SCALE;
 
   // The art box takes the shape's aspect at full bar width, within bounds, so
   // the shape fills the width or the height. Its bottom sits inside the band.
@@ -143,7 +143,7 @@ export function composeBarcode({
   const top = base * TOP_PAD_RATIO;
   const artZoneHeight = barsWidth * SCAN_ZONE_RATIO;
   const retailZoneHeight =
-    minBarHeightModules(format, barsWidth / BARCODE_SCALE) * BARCODE_SCALE;
+    minBarHeightModules(format, barsWidth / BARCODE_SCALE, xMm) * BARCODE_SCALE;
   const zoneHeight = retailSafe ? Math.max(artZoneHeight, retailZoneHeight) : artZoneHeight;
   const boxHeight = Math.min(
     Math.max((barsWidth * vbH) / vbW, base * ART_MIN_RATIO),
@@ -167,10 +167,11 @@ export function composeBarcode({
 
   // All bars as one path, so a gradient spans the whole barcode.
   const barHeight = zoneY + zoneHeight - top;
-  const bars: BarRect[] = extractColumns(rawBarcodeSvg).map((column) => ({
-    x: quietLeft + column.x,
-    width: column.width,
-  }));
+  const reduction = (bwrMm / (xMm ?? nominalXmm(format))) * BARCODE_SCALE;
+  const bars: BarRect[] = extractColumns(rawBarcodeSvg).map((column) => {
+    const width = Math.max(MIN_BAR_UNITS, column.width - reduction);
+    return { x: quietLeft + column.x + (column.width - width) / 2, width };
+  });
   const barsPath = bars
     .map((bar) => `M${fmt(bar.x)} ${fmt(top)}h${fmt(bar.width)}v${fmt(barHeight)}h${fmt(-bar.width)}Z`)
     .join("");
@@ -188,7 +189,10 @@ export function composeBarcode({
     fontSize
   );
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${fmt(totalWidth)} ${fmt(totalHeight)}" role="img" aria-label="${escapeXml(`${shape.label} barcode ${value}`)}">
+  const physicalSize = xMm
+    ? ` width="${fmt(sizeMm(totalWidth, xMm))}mm" height="${fmt(sizeMm(totalHeight, xMm))}mm"`
+    : "";
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg"${physicalSize} viewBox="0 0 ${fmt(totalWidth)} ${fmt(totalHeight)}" role="img" aria-label="${escapeXml(`${shape.label} barcode ${value}`)}">
 <defs>${gradientDef}<mask id="${maskId}" maskUnits="userSpaceOnUse" x="0" y="0" width="${fmt(totalWidth)}" height="${fmt(totalHeight)}"><rect width="${fmt(totalWidth)}" height="${fmt(totalHeight)}" fill="black"/>${shapePaths}<rect x="0" y="${fmt(zoneY)}" width="${fmt(totalWidth)}" height="${fmt(zoneHeight)}" fill="white"/></mask></defs>
 <rect width="${fmt(totalWidth)}" height="${fmt(totalHeight)}" fill="#ffffff"/>
 <path d="${barsPath}" fill="${paint}" mask="url(#${maskId})" shape-rendering="crispEdges"/>
@@ -206,7 +210,7 @@ ${digits.map(renderText).join("")}
     shape: { paths: shape.paths, fillRule, translateX: shapeX, translateY: shapeY, scale },
     digits,
     colorConfig,
-    // shortcut: contract stub (bars at retail height + label); Task 1 replaces with exact GS1 geometry.
+    // GS1 symbol: minimum-height bars plus the digit zone, whatever the band is.
     standardSize: { width: totalWidth, height: retailZoneHeight + labelHeight },
     svg,
   };

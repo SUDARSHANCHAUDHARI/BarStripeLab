@@ -5,8 +5,11 @@ export async function svgToPngBlob(svg: string, width = 2400): Promise<Blob> {
   const height = Math.round(width * aspect);
 
   // A viewBox-only SVG has no intrinsic size: Firefox will not draw it to a
-  // canvas and Safari rasterises it small, then upscales (blurry bars).
-  const sized = svg.replace(/^<svg(?![^>]*\swidth=)/, `<svg width="${width}" height="${height}"`);
+  // canvas and Safari rasterises it small, then upscales (blurry bars). A mm
+  // size is just as small at 96 dpi, so it is swapped for the pixel size.
+  const sized = svg.replace(/^<svg\b[^>]*>/, (tag) =>
+    tag.replace(/\s(?:width|height)="[^"]*"/g, "").replace(/^<svg/, `<svg width="${width}" height="${height}"`)
+  );
   const url = URL.createObjectURL(new Blob([sized], { type: "image/svg+xml" }));
   try {
     const image = new Image();
