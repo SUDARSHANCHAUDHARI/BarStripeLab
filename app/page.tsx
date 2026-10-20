@@ -74,7 +74,7 @@ export default function Page() {
       case "ean8":
         return "Enter a valid 7 or 8 digit barcode. We auto-generate checksum for 7 digits.";
       case "code128":
-        return "Enter alphanumeric text up to 48 characters.";
+        return "Enter up to 48 letters, numbers, spaces or symbols (no accents or emoji).";
       default:
         return "Invalid barcode";
     }
@@ -125,7 +125,7 @@ export default function Page() {
         clearTimeout(debounceTimer.current);
       }
     };
-  }, [value, format, style, customStyle, colorConfig]);
+  }, [value, format, style, activeStyle, colorConfig]);
 
   function handleTemplateSelect(template: Template): void {
     setCustomStyle(template.style);

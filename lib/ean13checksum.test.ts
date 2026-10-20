@@ -66,6 +66,12 @@ describe("isValidCODE128", () => {
     expect(isValidCODE128("")).toBe(false);
     expect(isValidCODE128("x".repeat(49))).toBe(false);
   });
+
+  it("accepts inner spaces and rejects non-ASCII", () => {
+    expect(isValidCODE128("HELLO WORLD")).toBe(true);
+    expect(isValidCODE128("héllo")).toBe(false);
+    expect(isValidCODE128("emoji😀")).toBe(false);
+  });
 });
 
 describe("normalize helpers", () => {

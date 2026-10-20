@@ -51,6 +51,8 @@ const BarcodeCanvas = forwardRef<HTMLDivElement, BarcodeCanvasProps>(
             boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
           }}
         >
+          {/* Data-URI SVG in a static export: next/image has nothing to optimize. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={svgDataUri}
             alt="Generated artistic barcode"

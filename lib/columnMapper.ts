@@ -42,7 +42,8 @@ export function extractColumns(svg: string): Column[] {
 
         // Verify it's a vertical line (x1 == x2)
         if (Math.abs(x1 - x2) < 0.1) {
-          const x = x1;
+          // bwip-js strokes are centred on x; the bar's left edge is half a width earlier.
+          const x = x1 - strokeWidth / 2;
           const width = strokeWidth;
           const height = Math.abs(y2 - y1);
 

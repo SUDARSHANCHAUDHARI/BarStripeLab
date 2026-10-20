@@ -38,7 +38,7 @@ export default function Controls({
       case "ean8":
         return "Enter 7 digits and we'll calculate the checksum, or paste 8 digits";
       case "code128":
-        return "Enter any text or numbers (no spaces). Variable length barcode.";
+        return "Letters, numbers, spaces and symbols (no accents or emoji). Variable length barcode.";
       case "ean13":
       default:
         return "Enter 12 digits and we'll calculate the checksum, or paste 13 digits";
@@ -47,13 +47,14 @@ export default function Controls({
 
   const getMaxLengthByFormat = () => {
     switch (format) {
+      // EAN limits leave room for pasted separators; normalization strips them.
       case "ean8":
-        return 8;
+        return 12;
       case "code128":
         return 48;
       case "ean13":
       default:
-        return 13;
+        return 20;
     }
   };
 
