@@ -51,19 +51,19 @@ const BOX =
   lines(10, 47, [52, 46, 50]) +
   wordmark(10, 90, 5, "6 × 30 g");
 
-const TAG_OUTLINE = "M11 0H49L60 12V100H0V12Z";
+const TAG_OUTLINE = "M11 0H49L60 12V110H0V12Z";
 const TAG =
   `<path data-role="kraft" d="${TAG_OUTLINE}"/>` +
   cut(TAG_OUTLINE) +
   `<circle data-role="mat" cx="30" cy="9" r="3.2"/><circle data-role="cut" fill="none" stroke-width=".6" cx="30" cy="9" r="3.2"/>` +
   wordmark(30, 24, 7, "Fieldwork", "middle");
 
-// Slots leave room for a standard EAN-13 with its tallest shape (about 37 x 58 mm at 100%).
+// Slots leave room for a standard EAN-13 with its tallest shape (about 37 x 70 mm at 100%, Retail-safe).
 export const PANELS: PanelDef[] = [
-  { id: "coffee-bag", label: "Coffee bag", widthMm: 120, heightMm: 180, art: COFFEE_BAG, slot: { xMm: 62, yMm: 96, widthMm: 50, heightMm: 70 } },
-  { id: "can", label: "Can label", widthMm: 160, heightMm: 110, art: CAN, slot: { xMm: 98, yMm: 32, widthMm: 52, heightMm: 70 } },
-  { id: "box", label: "Snack box", widthMm: 140, heightMm: 100, art: BOX, slot: { xMm: 80, yMm: 26, widthMm: 52, heightMm: 68 } },
-  { id: "tag", label: "Swing tag", widthMm: 60, heightMm: 100, art: TAG, slot: { xMm: 6, yMm: 30, widthMm: 48, heightMm: 64 } },
+  { id: "coffee-bag", label: "Coffee bag", widthMm: 120, heightMm: 180, art: COFFEE_BAG, slot: { xMm: 62, yMm: 92, widthMm: 50, heightMm: 72 } },
+  { id: "can", label: "Can label", widthMm: 160, heightMm: 110, art: CAN, slot: { xMm: 98, yMm: 30, widthMm: 52, heightMm: 72 } },
+  { id: "box", label: "Snack box", widthMm: 140, heightMm: 100, art: BOX, slot: { xMm: 80, yMm: 22, widthMm: 52, heightMm: 72 } },
+  { id: "tag", label: "Swing tag", widthMm: 60, heightMm: 110, art: TAG, slot: { xMm: 6, yMm: 30, widthMm: 48, heightMm: 74 } },
 ];
 
 // Centre the artwork on the slot, resting on its bottom edge. `fits` is false when
