@@ -115,7 +115,7 @@ Test your changes:
 
 - 📧 Email: sudarshantechlabs@gmail.com
 - 💬 Open an issue
-- 🔗 Check [PROJECT_SUMMARY.md](./PROJECT_SUMMARY.md)
+- 🔗 Check [README.md](./README.md)
 
 ---
 

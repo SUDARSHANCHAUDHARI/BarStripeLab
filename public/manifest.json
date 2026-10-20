@@ -1,11 +1,11 @@
 {
-  "name": "BarStripeLab - Turn Barcodes Into Brand Assets",
+  "name": "BarStripeLab — Shape Barcode Generator",
   "short_name": "BarStripeLab",
-  "description": "Create artistic, scannable barcodes with custom styles and colors.",
+  "description": "Turn EAN-13, EAN-8, UPC-A and Code 128 barcodes into shapes that still scan. Free, in your browser, SVG and PNG export.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3b82f6",
+  "background_color": "#f5f5f7",
+  "theme_color": "#f5f5f7",
   "orientation": "portrait-primary",
   "icons": [
     {
