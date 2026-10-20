@@ -1,42 +1,23 @@
-"use client";
-
-import { useState } from "react";
-
 const SHORTCUTS = [
-  ["Alt + S", "Next style"],
-  ["Alt + C", "Change color"],
+  ["/", "Open all settings"],
+  ["Alt + S", "Next shape"],
+  ["Alt + C", "Next colour"],
   ["Alt + D", "Download SVG"],
   ["Alt + P", "Download PNG"],
   ["Alt + H", "Share"],
 ];
 
 export default function KeyboardShortcutsInfo() {
-  const [open, setOpen] = useState(false);
-
   return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        aria-expanded={open}
-        aria-controls="shortcuts-panel"
-        className="btn"
-      >
-        Keyboard shortcuts
-      </button>
-
-      {open && (
-        <dl id="shortcuts-panel" className="mt-2 space-y-2 border-2 border-ink bg-white p-3 text-xs">
-          {SHORTCUTS.map(([keys, action]) => (
-            <div key={keys} className="flex items-center gap-3">
-              <dt>
-                <kbd className="border-2 border-ink bg-field px-2 py-1 font-black">{keys}</kbd>
-              </dt>
-              <dd>{action}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-    </div>
+    <dl className="grid gap-x-6 gap-y-2 text-base sm:grid-cols-2">
+      {SHORTCUTS.map(([keys, action]) => (
+        <div key={keys} className="flex items-center gap-3">
+          <dt>
+            <kbd className="rounded-md border border-b-2 border-rule bg-card px-2 py-1 font-mono text-sm text-ink">{keys}</kbd>
+          </dt>
+          <dd className="text-ink-2">{action}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }

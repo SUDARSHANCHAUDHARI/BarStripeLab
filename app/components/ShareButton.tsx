@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BTN_OUTLINE } from "./flow/ui";
 
 interface ShareButtonProps {
   // Read at click time so the link always matches the current design.
@@ -39,6 +40,7 @@ export async function shareApp(
 
 export default function ShareButton({ getUrl, title = DEFAULT_TITLE }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
+  const [failed, setFailed] = useState(false);
   // Checked after mount so the static HTML and the first client render match.
   const [canShare, setCanShare] = useState(false);
 
@@ -47,65 +49,25 @@ export default function ShareButton({ getUrl, title = DEFAULT_TITLE }: ShareButt
   }, []);
 
   async function copyLink() {
-    if (await copyToClipboard(getUrl())) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  }
-
-  function openPopup(href: string) {
-    window.open(href, "_blank", "noopener,noreferrer,width=500,height=500");
+    const ok = await copyToClipboard(getUrl());
+    setFailed(!ok);
+    setCopied(ok);
+    if (ok) setTimeout(() => setCopied(false), 2000);
   }
 
   return (
-    <div>
-      <span id="share-label" className="field-label">
-        Share this design
-      </span>
-      <div role="group" aria-labelledby="share-label" className="mt-2 flex flex-wrap gap-2">
-        {canShare && (
-          <button type="button" onClick={() => shareApp(getUrl(), title)} className="btn" title="Share (Alt+H)">
-            Share
-          </button>
-        )}
-        <button type="button" onClick={copyLink} className="btn">
-          {copied ? "Link copied" : "Copy link"}
+    <>
+      {canShare && (
+        <button type="button" onClick={() => shareApp(getUrl(), title)} className={BTN_OUTLINE} title="Share (Alt+H)">
+          Share
         </button>
-        <button
-          type="button"
-          className="btn"
-          onClick={() =>
-            openPopup(
-              `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(getUrl())}`
-            )
-          }
-        >
-          X
-        </button>
-        <button
-          type="button"
-          className="btn"
-          onClick={() =>
-            openPopup(
-              `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(getUrl())}`
-            )
-          }
-        >
-          LinkedIn
-        </button>
-        <button
-          type="button"
-          className="btn"
-          onClick={() => {
-            window.location.href = `mailto:?subject=BarStripeLab&body=${encodeURIComponent(`${title}\n\n${getUrl()}`)}`;
-          }}
-        >
-          Email
-        </button>
-      </div>
+      )}
+      <button type="button" onClick={copyLink} className={BTN_OUTLINE}>
+        {copied ? "Link copied" : "Copy share link"}
+      </button>
       <span role="status" className="sr-only">
-        {copied ? "Link copied to clipboard" : ""}
+        {copied ? "Link copied to clipboard" : failed ? "Could not copy the link" : ""}
       </span>
-    </div>
+    </>
   );
 }
