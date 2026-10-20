@@ -1,98 +1,149 @@
-const FINE_PRINT = [
+import Link from "next/link";
+import type { ReactNode } from "react";
+import type { ShapeDef } from "@/types";
+import Faq from "./Faq";
+import ShapeThumb from "./ShapeThumb";
+
+const H2_CLASS = "text-[clamp(28px,3.4vw,40px)] leading-[1.1]";
+
+const BEFORE_DOWNLOAD = [
   {
-    title: "Print and test",
-    body: "Artistic bars are still bars. Print a sample at the real size, on the real material, and scan it with the devices your customers and shops use before you order a full run. Dark bars on a light background read best.",
+    title: "The number is checked",
+    body: "The last digit is validated as you type. If it's wrong, we show the right one.",
   },
   {
-    title: "Protected zone",
-    body: "The band along the bottom keeps every bar at full height. Cropping it, covering it or squashing the image can make the code unreadable. Keep the whole picture, including the blank margins on either side.",
+    title: "The size is exact",
+    body: "SVG and PDF files come out in millimetres at the real print size, so nothing needs resizing.",
   },
   {
-    title: "GS1 numbers",
-    body: "Shops expect numbers licensed to your company by GS1. This tool draws whatever digits you enter; it cannot issue or register a number. Get yours from GS1 before you sell at retail.",
+    title: "The artwork is read back",
+    body: "We decode the finished barcode in your browser and check it matches your number.",
+  },
+  {
+    title: "Nothing leaves your browser",
+    body: "No account, no watermark, no upload. Your number and design stay on your device.",
   },
 ];
 
-const FAQ = [
-  {
-    q: "Is it free? Do I need an account?",
-    a: "It is free and there is no account. The page does all the work in your browser, so your digits and designs are never sent to a server.",
-  },
-  {
-    q: "How do I make a barcode like this?",
-    a: "Pick a format, type your digits (leave off the last one and we add the check digit), choose a shape and a color, then download the SVG or PNG. The address bar always holds your exact design, so the share buttons send it as it is.",
-  },
-  {
-    q: "Which shapes can I use?",
-    a: "Browse the style grid and filter it by category. Every shape also has its own page that you can bookmark or send to a teammate.",
-  },
-  {
-    q: "Will it scan?",
-    a: "Usually, if the bars are dark, the protected bottom band is intact and the print is large enough. A warning appears under COLOR when the lightest bars are too pale. Test a printed sample either way.",
-  },
-  {
-    q: "Do I need GS1 numbers?",
-    a: "For selling through shops, yes. Retailers check numbers against the GS1 registry. For inventory labels, tickets, posters or art, any digits work, and Code 128 accepts text as well.",
-  },
-  {
-    q: "Which formats are supported?",
-    a: "EAN-13, EAN-8, UPC-A and Code 128. The first three take digits only and get a check digit if you leave it off. Code 128 takes letters, numbers, spaces and symbols, up to 48 characters.",
-  },
-  {
-    q: "What is the AI generator and why does it want my API key?",
-    a: "It is optional. You describe your brand and Claude suggests a shape and a color. It runs on your own Anthropic key, which stays in this tab's memory, goes only to api.anthropic.com and is never stored. Requests are billed to your Anthropic account. Skip it and everything else works.",
-  },
-];
+// Bar widths in SVG units, cycled to fill the symbol between the clear spaces.
+const BAR_WIDTHS = [2, 1, 3, 1, 2, 4, 1, 2, 1, 3, 2, 1];
+const BARS_FROM = 22;
+const BARS_TO = 218;
+const BAND_TOP = 78;
+const BARS_BOTTOM = 138;
+const DOME = { cx: (BARS_FROM + BARS_TO) / 2, halfWidth: 62, rise: 62 };
 
-export default function InfoSections() {
+// Retail-safe in one picture: bars follow the dome above the band and stay full height inside it.
+function bandDiagram() {
+  const bars: { x: number; width: number; top: number }[] = [];
+  let x = BARS_FROM;
+  for (let i = 0; ; i++) {
+    const width = BAR_WIDTHS[i % BAR_WIDTHS.length];
+    if (x + width > BARS_TO) break;
+    const across = Math.max(0, 1 - ((x + width / 2 - DOME.cx) / DOME.halfWidth) ** 2);
+    bars.push({ x, width, top: BAND_TOP - Math.sqrt(across) * DOME.rise });
+    x += width + (i % 3 === 0 ? 3 : 2);
+  }
+  return bars;
+}
+
+function HowRetailSafeWorks() {
   return (
-    <div className="mt-16 space-y-14">
-      <section aria-labelledby="why-title" className="max-w-2xl space-y-3">
-        <h2 id="why-title" className="text-lg font-black uppercase text-ink">
-          Why BarStripeLab
+    <section aria-labelledby="how-title" className="grid gap-8 md:grid-cols-2 md:items-center">
+      <div className="space-y-4">
+        <h2 id="how-title" className={H2_CLASS}>
+          How Retail-safe works
         </h2>
         <p>
-          A barcode is usually the plainest thing on a package. BarStripeLab turns it into a small
-          piece of artwork: the bars are cut into a silhouette you choose, while a protected band
-          along the bottom stays untouched so scanners can still read it.
+          Checkout scanners read along a line. If that line crosses a cut bar, the read fails. So
+          Retail-safe keeps every bar full height along the bottom band, and the shape sits above it.
         </p>
-        <p>
-          Pick a format, type your digits, choose a shape and a color, then take away a clean SVG or
-          a high-resolution PNG. Nothing is uploaded and there is nothing to sign up for.
+        <p className="text-ink-2">
+          Art lets the shape cut into the bars for a bolder look. Phones usually read it. Strict
+          checkout scanners may not, so use it for things that don&rsquo;t need to scan at a till.
         </p>
-      </section>
-
-      <section aria-labelledby="fine-print-title" className="space-y-4">
-        <h2 id="fine-print-title" className="text-lg font-black uppercase text-ink">
-          The fine print
-        </h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          {FINE_PRINT.map((item) => (
-            <div key={item.title} className="border-2 border-ink bg-white p-4">
-              <h3 className="text-xs font-black uppercase text-ink">{item.title}</h3>
-              <p className="mt-2">{item.body}</p>
-            </div>
+        <p className="text-ink-2">Both modes keep the clear space on either side and the digits underneath.</p>
+      </div>
+      <figure className="rounded-[24px] bg-card p-5 sm:p-6">
+        <svg
+          viewBox="0 0 240 160"
+          className="h-auto w-full"
+          role="img"
+          aria-label="A barcode with a dome-shaped top. The bars in the bottom band keep their full height. Only the bars above the band follow the shape."
+        >
+          <rect x="10" y={BAND_TOP} width="220" height={BARS_BOTTOM - BAND_TOP} rx="4" className="fill-pass-bg" />
+          {bandDiagram().map((bar) => (
+            <rect key={bar.x} x={bar.x} y={bar.top} width={bar.width} height={BARS_BOTTOM - bar.top} className="fill-ink" />
           ))}
-        </div>
-      </section>
+          <text x="14" y="154" fontSize="10" className="fill-ink-2">Clear space</text>
+          <text x="226" y="154" fontSize="10" textAnchor="end" className="fill-pass">Full-height band</text>
+          <text x="120" y="12" fontSize="10" textAnchor="middle" className="fill-ink-2">Shape area</text>
+        </svg>
+        <figcaption className="mt-3 text-[15px] text-ink-2">
+          The scanner line crosses the band, where no bar is cut.
+        </figcaption>
+      </figure>
+    </section>
+  );
+}
 
-      <section aria-labelledby="faq-title" className="max-w-3xl space-y-4">
-        <h2 id="faq-title" className="text-lg font-black uppercase text-ink">
-          FAQ
-        </h2>
-        <div className="space-y-2">
-          {FAQ.map((item) => (
-            <details key={item.q} className="group border-2 border-ink bg-white">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-3 text-xs font-black uppercase text-ink [&::-webkit-details-marker]:hidden">
-                {item.q}
-                <span aria-hidden="true" className="shrink-0 group-open:hidden">+</span>
-                <span aria-hidden="true" className="hidden shrink-0 group-open:inline">-</span>
-              </summary>
-              <p className="border-t-2 border-ink p-3">{item.a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
+function WhatHappens() {
+  return (
+    <section aria-labelledby="trust-title" className="space-y-5">
+      <h2 id="trust-title" className={H2_CLASS}>
+        What happens before you download
+      </h2>
+      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {BEFORE_DOWNLOAD.map((item) => (
+          <li key={item.title} className="rounded-[14px] bg-card p-5">
+            <h3 className="text-xl leading-tight">{item.title}</h3>
+            <p className="mt-2 text-base text-ink-2">{item.body}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+interface ShapeLinksProps {
+  shapes: ShapeDef[];
+  title: string;
+  id?: string;
+  titleId: string;
+}
+
+// One link per shape page: the same grid on the home page and under each shape.
+export function ShapeLinks({ shapes, title, id, titleId }: ShapeLinksProps) {
+  return (
+    <section id={id} aria-labelledby={titleId} className="space-y-5">
+      <h2 id={titleId} className={H2_CLASS}>
+        {title}
+      </h2>
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+        {shapes.map((shape) => (
+          <li key={shape.id}>
+            <Link
+              href={`/shape/${shape.id}`}
+              className="flex min-h-[56px] items-center gap-3 rounded-[14px] border-2 border-transparent bg-card px-3 py-2 leading-tight text-ink hover:border-ink"
+            >
+              <ShapeThumb shape={shape} className="h-8 w-8 shrink-0" />
+              <span className="min-w-0 break-words text-base">{shape.label}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+// The home page slots the shape list between the explainer and the FAQ.
+export default function InfoSections({ children }: { children?: ReactNode }) {
+  return (
+    <div className="mt-20 space-y-20">
+      <WhatHappens />
+      <HowRetailSafeWorks />
+      {children}
+      <Faq />
     </div>
   );
 }

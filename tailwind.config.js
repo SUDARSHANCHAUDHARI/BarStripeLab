@@ -41,10 +41,12 @@ module.exports = {
         danger: "#b3001b",
       },
       fontFamily: {
+        // Old override: the legacy components inherit it. Removable once nothing uses font-sans on its own.
         sans: MONO,
-        mono: ['"IBM Plex Mono"', ...MONO],
-        display: ['"Bricolage Grotesque"', "ui-sans-serif", "system-ui", "sans-serif"],
-        body: ['"Atkinson Hyperlegible"', "ui-sans-serif", "system-ui", "sans-serif"],
+        // The --font-* variables come from next/font/local in app/layout.tsx.
+        mono: ["var(--font-mono)", ...MONO],
+        display: ["var(--font-display)", "ui-sans-serif", "system-ui", "sans-serif"],
+        body: ["var(--font-body)", "ui-sans-serif", "system-ui", "sans-serif"],
       },
     },
   },

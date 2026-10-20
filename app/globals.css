@@ -5,26 +5,38 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 1rem;
   }
 
   body {
-    @apply bg-paper font-sans text-sm text-ink2 antialiased;
+    @apply bg-board font-body text-lg leading-[1.55] text-ink antialiased;
   }
 
-  button,
-  input,
-  select,
-  textarea {
-    border-radius: 0;
+  h1,
+  h2,
+  h3 {
+    @apply font-display font-bold;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  a {
+    text-underline-offset: 3px;
   }
 
   :focus-visible {
-    outline: 2px solid theme("colors.ink");
-    outline-offset: 2px;
+    outline: 3px solid theme("colors.focus");
+    outline-offset: 3px;
+  }
+
+  /* The focus blue is 1.5:1 on the mat, so the result stage uses a light ring. */
+  .on-mat :focus-visible {
+    outline-color: theme("colors.card");
   }
 }
 
 @layer components {
+  /* Legacy classes for the old UI (Controls, Generator, error page). Removable with ink2, muted, paper, field, danger. */
   .field-label {
     @apply block text-xs font-black uppercase tracking-wide text-ink;
   }
@@ -45,5 +57,12 @@
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
   }
 }
