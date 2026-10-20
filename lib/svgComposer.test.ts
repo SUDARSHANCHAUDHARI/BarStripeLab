@@ -81,3 +81,18 @@ describe("composeBarcodeSvg", () => {
     expect(groups).toEqual(["5", "901234", "123457"]);
   });
 });
+
+describe("lowestBarContrast", () => {
+  it("flags light colors and passes dark ones", async () => {
+    const { lowestBarContrast } = await import("./colorEngine");
+    expect(lowestBarContrast({ ...baseColor, mode: "custom", solidColor: "#000000" })).toBeCloseTo(21, 0);
+    expect(lowestBarContrast({ ...baseColor, mode: "custom", solidColor: "#ffff00" })).toBeLessThan(1.5);
+    expect(
+      lowestBarContrast({
+        ...baseColor,
+        mode: "gradient",
+        gradientStops: [{ offset: 0, color: "#000000" }, { offset: 1, color: "#eeeeee" }],
+      })
+    ).toBeLessThan(1.3);
+  });
+});

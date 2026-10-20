@@ -72,3 +72,29 @@ export function buildGradientDef(config: ColorConfig, gradientId: string): strin
 
   return `${tag}${stopTags}${closeTag}`;
 }
+
+function relativeLuminance(hex: string): number {
+  let digits = hex.slice(1);
+  if (digits.length <= 4) {
+    digits = digits.split("").map((d) => d + d).join("");
+  }
+  const [r, g, b] = [0, 2, 4].map((i) => {
+    const channel = parseInt(digits.slice(i, i + 2), 16) / 255;
+    return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+// WCAG contrast ratio of a bar color against the white background (1 to 21).
+export function contrastWithWhite(color: string): number {
+  return 1.05 / (relativeLuminance(safeColor(color)) + 0.05);
+}
+
+// Lightest color across the active mode: what a scanner has to read.
+export function lowestBarContrast(config: ColorConfig): number {
+  const colors =
+    config.mode === "gradient"
+      ? normalizeStops(config.gradientStops).map((stop) => stop.color)
+      : [getSolidColor(config)];
+  return Math.min(...colors.map(contrastWithWhite));
+}
