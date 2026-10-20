@@ -140,17 +140,23 @@ export function composeBarcode({
   // The art box takes the shape's aspect at full bar width, within bounds, so
   // the shape fills the width or the height. Its bottom sits inside the band.
   const [vbX, vbY, vbW, vbH] = shape.viewBox;
-  const top = base * TOP_PAD_RATIO;
+  // No shape (empty paths): the standard barcode alone, bars at the GS1 minimum.
+  const noShape = shape.paths.length === 0;
+  const top = noShape ? 0 : base * TOP_PAD_RATIO;
   const artZoneHeight = barsWidth * SCAN_ZONE_RATIO;
   const retailZoneHeight =
     minBarHeightModules(format, barsWidth / BARCODE_SCALE, xMm) * BARCODE_SCALE;
-  const zoneHeight = retailSafe ? Math.max(artZoneHeight, retailZoneHeight) : artZoneHeight;
+  const zoneHeight = noShape
+    ? retailZoneHeight
+    : retailSafe
+      ? Math.max(artZoneHeight, retailZoneHeight)
+      : artZoneHeight;
   const boxHeight = Math.min(
     Math.max((barsWidth * vbH) / vbW, base * ART_MIN_RATIO),
     base * ART_MAX_RATIO
   );
   // The overlap stays the art-mode size so a taller band doesn't swallow the shape.
-  const zoneY = top + boxHeight - artZoneHeight * SHAPE_OVERLAP_RATIO;
+  const zoneY = noShape ? 0 : top + boxHeight - artZoneHeight * SHAPE_OVERLAP_RATIO;
   const totalHeight = zoneY + zoneHeight + labelHeight;
 
   // Fit the shape inside the art box, centred, standing on the scan zone.

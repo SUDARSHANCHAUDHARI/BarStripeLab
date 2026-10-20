@@ -3,6 +3,7 @@ import type { BarcodeFormat, ColorConfig, ShapeDef } from "@/types";
 import { generateBarcodeSVG, BARCODE_SCALE } from "./barcode";
 import { composeBarcode, composeBarcodeSvg } from "./svgComposer";
 import { sizeMm } from "./printSize";
+import { minBarHeightModules } from "./gs1";
 import { safeColor, buildGradientDef } from "./colorEngine";
 import { SHAPES } from "./shapes";
 
@@ -233,5 +234,21 @@ describe("print size and bar width reduction", () => {
     const floor = (6.35 / xMm) * BARCODE_SCALE;
     expect(floor).toBeGreaterThan(0.15 * composed.viewBox.width);
     expect(composed.band.height).toBeGreaterThanOrEqual(floor - 1e-6);
+  });
+});
+
+describe("no shape", () => {
+  const none = { ...SHAPES[0], id: "none", label: "No shape", viewBox: [0, 0, 1, 1], paths: [], description: "" } as ShapeDef;
+
+  it.each(FORMATS)("draws only the standard barcode for %s (%s)", async (value, format) => {
+    const raw = await generateBarcodeSVG(value, format);
+    for (const retailSafe of [false, true]) {
+      const composed = composeBarcode({ rawBarcodeSvg: raw, shape: none, colorConfig: baseColor, value, format, retailSafe });
+      const barModules = composed.barsWidth / BARCODE_SCALE;
+      expect(composed.viewBox.height).toBeCloseTo(composed.standardSize.height, 6);
+      expect(composed.band.height).toBeCloseTo(minBarHeightModules(format, barModules) * BARCODE_SCALE, 6);
+      expect(composed.top).toBe(0);
+      expect(composed.barHeight).toBeCloseTo(composed.band.height, 6);
+    }
   });
 });
