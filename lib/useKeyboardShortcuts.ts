@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface KeyboardShortcuts {
   toggleStyle?: () => void;
@@ -8,21 +8,21 @@ interface KeyboardShortcuts {
   share?: () => void;
 }
 
-export function useKeyboardShortcuts({
-  toggleStyle,
-  toggleColor,
-  downloadSVG,
-  downloadPNG,
-  share,
-}: KeyboardShortcuts) {
+export function useKeyboardShortcuts(shortcuts: KeyboardShortcuts) {
+  // Callers pass fresh closures every render; the listener reads the latest through a ref.
+  const latest = useRef(shortcuts);
+  useEffect(() => {
+    latest.current = shortcuts;
+  });
+
   useEffect(() => {
     // event.code, not event.key: on macOS Option+S types "ß", not "s".
-    const actions: Record<string, (() => void) | undefined> = {
-      KeyS: toggleStyle,
-      KeyC: toggleColor,
-      KeyD: downloadSVG,
-      KeyP: downloadPNG,
-      KeyH: share,
+    const keys: Record<string, keyof KeyboardShortcuts> = {
+      KeyS: "toggleStyle",
+      KeyC: "toggleColor",
+      KeyD: "downloadSVG",
+      KeyP: "downloadPNG",
+      KeyH: "share",
     };
 
     function handleKeyDown(event: KeyboardEvent) {
@@ -35,7 +35,7 @@ export function useKeyboardShortcuts({
         return;
       }
 
-      const action = event.altKey ? actions[event.code] : undefined;
+      const action = event.altKey ? latest.current[keys[event.code]] : undefined;
       if (action) {
         event.preventDefault();
         action();
@@ -44,5 +44,5 @@ export function useKeyboardShortcuts({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggleStyle, toggleColor, downloadSVG, downloadPNG, share]);
+  }, []);
 }
