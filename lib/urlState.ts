@@ -1,4 +1,4 @@
-import type { BarcodeFormat, ColorConfig } from "@/types";
+import type { BarcodeFormat, ColorConfig, PanelId } from "@/types";
 import { COLOR_PRESETS, safeColor } from "@/lib/colorEngine";
 import { isShapeId } from "@/lib/shapes";
 
@@ -8,6 +8,11 @@ export type Design = {
   shape: string;
   colorConfig: ColorConfig;
   retailSafe: boolean;
+  // Module width in mm (EAN/UPC: 0.330 x magnification).
+  xMm: number;
+  // Bars thinner by this many mm (0-0.10).
+  bwrMm: number;
+  panel: PanelId;
 };
 
 export const DEFAULT_COLOR_CONFIG: ColorConfig = {
@@ -95,5 +100,9 @@ export function decodeDesign(search: string, fallback: Design): Design {
     shape: s !== null && isShapeId(s) ? s : fallback.shape,
     colorConfig: c ? decodeColor(c, fallback.colorConfig) : fallback.colorConfig,
     retailSafe: r === "1" ? true : r === "0" ? false : fallback.retailSafe,
+    // shortcut: Task 5 (FLOW) adds the x/b/p params; until then these keep the fallback.
+    xMm: fallback.xMm,
+    bwrMm: fallback.bwrMm,
+    panel: fallback.panel,
   };
 }

@@ -8,6 +8,9 @@ const base: Design = {
   shape: SHAPE_IDS[0],
   colorConfig: DEFAULT_COLOR_CONFIG,
   retailSafe: false,
+  xMm: 0.33,
+  bwrMm: 0,
+  panel: "coffee-bag",
 };
 
 describe("urlState", () => {

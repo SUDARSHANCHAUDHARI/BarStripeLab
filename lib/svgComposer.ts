@@ -1,4 +1,4 @@
-import type { BarcodeFormat, ColorConfig, ShapeDef } from "@/types";
+import type { BarRect, BarcodeFormat, ColorConfig, ComposedBarcode, DigitText, ShapeDef } from "@/types";
 import { extractColumns } from "@/lib/columnMapper";
 import { buildGradientDef, buildPaintValue } from "@/lib/colorEngine";
 import { BARCODE_SCALE } from "@/lib/barcode";
@@ -43,6 +43,10 @@ export type ComposeOptions = {
   idPrefix?: string;
   // Keep every bar at the GS1 minimum height and draw the art above it.
   retailSafe?: boolean;
+  // Module width in mm: sets the SVG's physical width/height (Task 1).
+  xMm?: number;
+  // Bars thinner by this many mm, centres kept, for ink spread (Task 1).
+  bwrMm?: number;
 };
 
 function escapeXml(value: string): string {
@@ -63,17 +67,11 @@ function fmt(value: number): string {
   return Number(value.toFixed(3)).toString();
 }
 
-function buildText(
-  text: string,
-  centerX: number,
-  baselineY: number,
-  size: number,
-  fitWidth?: number
-): string {
+function renderText({ text, x, y, size, fitWidth }: DigitText): string {
   const fit = fitWidth
     ? ` textLength="${fmt(fitWidth)}" lengthAdjust="spacingAndGlyphs"`
     : "";
-  return `<text x="${fmt(centerX)}" y="${fmt(baselineY)}" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="${fmt(size)}" font-weight="700" fill="#111111"${fit}>${escapeXml(text)}</text>`;
+  return `<text x="${fmt(x)}" y="${fmt(y)}" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="${fmt(size)}" font-weight="700" fill="#111111"${fit}>${escapeXml(text)}</text>`;
 }
 
 // Human-readable digits in the standard groups under the bars.
@@ -84,39 +82,39 @@ function buildDigits(
   barsWidth: number,
   baselineY: number,
   size: number
-): string {
+): DigitText[] {
   const X = BARCODE_SCALE;
   const at = (module: number) => barsX + module * X;
+  const t = (text: string, x: number, s = size, fitWidth?: number): DigitText => ({
+    text,
+    x,
+    y: baselineY,
+    size: s,
+    ...(fitWidth ? { fitWidth } : {}),
+  });
 
   if (format === "ean13" && value.length === 13) {
-    return [
-      buildText(value[0], barsX - 4 * X, baselineY, size),
-      buildText(value.slice(1, 7), at(24), baselineY, size, 38 * X),
-      buildText(value.slice(7), at(71), baselineY, size, 38 * X),
-    ].join("");
+    return [t(value[0], barsX - 4 * X), t(value.slice(1, 7), at(24), size, 38 * X), t(value.slice(7), at(71), size, 38 * X)];
   }
 
   if (format === "ean8" && value.length === 8) {
-    return [
-      buildText(value.slice(0, 4), at(17), baselineY, size, 25 * X),
-      buildText(value.slice(4), at(50), baselineY, size, 25 * X),
-    ].join("");
+    return [t(value.slice(0, 4), at(17), size, 25 * X), t(value.slice(4), at(50), size, 25 * X)];
   }
 
   if (format === "upca" && value.length === 12) {
     return [
-      buildText(value[0], barsX - 4 * X, baselineY, size * 0.8),
-      buildText(value.slice(1, 6), at(27.5), baselineY, size, 31 * X),
-      buildText(value.slice(6, 11), at(67.5), baselineY, size, 31 * X),
-      buildText(value[11], barsX + barsWidth + 4 * X, baselineY, size * 0.8),
-    ].join("");
+      t(value[0], barsX - 4 * X, size * 0.8),
+      t(value.slice(1, 6), at(27.5), size, 31 * X),
+      t(value.slice(6, 11), at(67.5), size, 31 * X),
+      t(value[11], barsX + barsWidth + 4 * X, size * 0.8),
+    ];
   }
 
   const fitWidth = Math.min(barsWidth, value.length * size * GLYPH_WIDTH_RATIO);
-  return buildText(value, barsX + barsWidth / 2, baselineY, size, fitWidth);
+  return [t(value, barsX + barsWidth / 2, size, fitWidth)];
 }
 
-export function composeBarcodeSvg({
+export function composeBarcode({
   rawBarcodeSvg,
   shape,
   colorConfig,
@@ -124,7 +122,7 @@ export function composeBarcodeSvg({
   format,
   idPrefix = "bsl",
   retailSafe = false,
-}: ComposeOptions): string {
+}: ComposeOptions): ComposedBarcode {
   const barsWidth = parseWidth(rawBarcodeSvg);
   const quietLeft = QUIET_ZONE_MODULES[format].left * BARCODE_SCALE;
   const quietRight = QUIET_ZONE_MODULES[format].right * BARCODE_SCALE;
@@ -169,11 +167,12 @@ export function composeBarcodeSvg({
 
   // All bars as one path, so a gradient spans the whole barcode.
   const barHeight = zoneY + zoneHeight - top;
-  const barsPath = extractColumns(rawBarcodeSvg)
-    .map(
-      (column) =>
-        `M${fmt(quietLeft + column.x)} ${fmt(top)}h${fmt(column.width)}v${fmt(barHeight)}h${fmt(-column.width)}Z`
-    )
+  const bars: BarRect[] = extractColumns(rawBarcodeSvg).map((column) => ({
+    x: quietLeft + column.x,
+    width: column.width,
+  }));
+  const barsPath = bars
+    .map((bar) => `M${fmt(bar.x)} ${fmt(top)}h${fmt(bar.width)}v${fmt(barHeight)}h${fmt(-bar.width)}Z`)
     .join("");
 
   const maskId = `${idPrefix}-mask`;
@@ -189,10 +188,30 @@ export function composeBarcodeSvg({
     fontSize
   );
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${fmt(totalWidth)} ${fmt(totalHeight)}" role="img" aria-label="${escapeXml(`${shape.label} barcode ${value}`)}">
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${fmt(totalWidth)} ${fmt(totalHeight)}" role="img" aria-label="${escapeXml(`${shape.label} barcode ${value}`)}">
 <defs>${gradientDef}<mask id="${maskId}" maskUnits="userSpaceOnUse" x="0" y="0" width="${fmt(totalWidth)}" height="${fmt(totalHeight)}"><rect width="${fmt(totalWidth)}" height="${fmt(totalHeight)}" fill="black"/>${shapePaths}<rect x="0" y="${fmt(zoneY)}" width="${fmt(totalWidth)}" height="${fmt(zoneHeight)}" fill="white"/></mask></defs>
 <rect width="${fmt(totalWidth)}" height="${fmt(totalHeight)}" fill="#ffffff"/>
 <path d="${barsPath}" fill="${paint}" mask="url(#${maskId})" shape-rendering="crispEdges"/>
-${digits}
+${digits.map(renderText).join("")}
 </svg>`;
+
+  return {
+    viewBox: { width: totalWidth, height: totalHeight },
+    barsX: quietLeft,
+    barsWidth,
+    top,
+    barHeight,
+    bars,
+    band: { y: zoneY, height: zoneHeight },
+    shape: { paths: shape.paths, fillRule, translateX: shapeX, translateY: shapeY, scale },
+    digits,
+    colorConfig,
+    // shortcut: contract stub (bars at retail height + label); Task 1 replaces with exact GS1 geometry.
+    standardSize: { width: totalWidth, height: retailZoneHeight + labelHeight },
+    svg,
+  };
+}
+
+export function composeBarcodeSvg(options: ComposeOptions): string {
+  return composeBarcode(options).svg;
 }

@@ -55,3 +55,50 @@ export type StylePreset = {
 export type Template = StylePreset & {
   name: string;
 };
+
+// ---- Redesign contracts (see docs/superpowers/plans/2026-10-21-barstripelab-redesign.md) ----
+
+// Geometry is in SVG units: BARCODE_SCALE units per module.
+export type BarRect = { x: number; width: number };
+
+export type DigitText = { text: string; x: number; y: number; size: number; fitWidth?: number };
+
+// Structured layout every output (SVG, PDF, PNG, decode) draws from.
+export type ComposedBarcode = {
+  viewBox: { width: number; height: number };
+  barsX: number;
+  barsWidth: number;
+  top: number;
+  barHeight: number;
+  bars: BarRect[];
+  band: { y: number; height: number };
+  shape: {
+    paths: string[];
+    fillRule: "nonzero" | "evenodd";
+    translateX: number;
+    translateY: number;
+    scale: number;
+  };
+  digits: DigitText[];
+  colorConfig: ColorConfig;
+  // Standard barcode only: bars + quiet zones + digits, without the shape.
+  standardSize: { width: number; height: number };
+  svg: string;
+};
+
+export type PanelId = "coffee-bag" | "can" | "box" | "tag";
+
+export type ScanFactor = {
+  id: "redLight" | "barHeight" | "quietZones" | "printSize" | "digits" | "camera";
+  label: string;
+  points: number;
+  max: number;
+  message: string;
+};
+
+export type ScanScore = {
+  score: number;
+  band: "likely" | "risky" | "fail";
+  capped: boolean;
+  factors: ScanFactor[];
+};

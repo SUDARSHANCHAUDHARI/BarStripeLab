@@ -43,6 +43,9 @@ export default function Generator({ initialShape }: GeneratorProps) {
     shape: initialShape && isShapeId(initialShape) ? initialShape : DEFAULT_SHAPE,
     colorConfig: DEFAULT_COLOR_CONFIG,
     retailSafe: false,
+    xMm: 0.33,
+    bwrMm: 0,
+    panel: "coffee-bag",
   });
   // The query string is read after mount so the static HTML and the first client render match.
   const [urlRead, setUrlRead] = useState(false);
