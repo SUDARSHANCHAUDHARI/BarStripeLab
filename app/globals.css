@@ -2,30 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background-color: #f9fafb;
-}
-
-input[type="text"],
-input[type="color"],
-select,
-textarea {
-  font-size: 16px;
-}
-
-@media (max-width: 640px) {
   body {
-    font-size: 14px;
+    @apply bg-paper font-sans text-sm text-ink2 antialiased;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    border-radius: 0;
+  }
+
+  :focus-visible {
+    outline: 2px solid theme("colors.ink");
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .field-label {
+    @apply block text-xs font-black uppercase tracking-wide text-ink;
+  }
+
+  .btn {
+    @apply border-2 border-ink bg-white px-3 py-2 text-xs font-black uppercase text-ink hover:bg-field aria-pressed:bg-ink aria-pressed:text-white aria-pressed:hover:bg-ink disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .field {
+    @apply w-full border-0 bg-field px-3 py-3 text-ink placeholder:text-muted;
+  }
+
+  .notice {
+    @apply border-2 border-ink bg-white p-3 text-xs;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }

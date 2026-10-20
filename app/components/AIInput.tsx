@@ -32,43 +32,55 @@ export default function AIInput({ onGenerate }: AIInputProps) {
   }
 
   return (
-    <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
-      <label className="block text-sm font-medium text-gray-700">
-        AI Style Generator
-      </label>
-      <input
-        type="password"
-        autoComplete="off"
-        spellCheck={false}
-        placeholder="Your Anthropic API key (sk-ant-...)"
-        aria-label="Anthropic API key"
-        value={apiKey}
-        onChange={(e) => setApiKey(e.target.value)}
-        className="w-full border border-gray-300 p-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      <div className="flex gap-2">
-        <input
-          type="text"
-          maxLength={200}
-          placeholder="Describe the brand, e.g. cosy coffee shop by the sea"
-          aria-label="Style description"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
-          className="flex-1 border border-gray-300 p-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={handleGenerate}
-          disabled={!canGenerate}
-          className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-4 py-2 rounded font-medium text-sm transition"
-        >
-          {isLoading ? "..." : "Generate"}
+    <details className="group border-2 border-ink bg-white">
+      <summary className="flex cursor-pointer list-none items-center justify-between p-3 text-xs font-black uppercase text-ink [&::-webkit-details-marker]:hidden">
+        AI style generator
+        <span aria-hidden="true" className="group-open:hidden">+</span>
+        <span aria-hidden="true" className="hidden group-open:inline">-</span>
+      </summary>
+      <div className="space-y-3 border-t-2 border-ink p-3">
+        <div>
+          <label htmlFor="ai-key" className="field-label">
+            Anthropic API key
+          </label>
+          <input
+            id="ai-key"
+            type="password"
+            autoComplete="off"
+            spellCheck={false}
+            placeholder="sk-ant-..."
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            className="field mt-1 py-2"
+          />
+        </div>
+        <div>
+          <label htmlFor="ai-prompt" className="field-label">
+            Describe the brand
+          </label>
+          <input
+            id="ai-prompt"
+            type="text"
+            maxLength={200}
+            placeholder="Cosy coffee shop by the sea"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
+            className="field mt-1 py-2"
+          />
+        </div>
+        <button type="button" onClick={handleGenerate} disabled={!canGenerate} className="btn w-full py-3">
+          {isLoading ? "Generating..." : "Generate style"}
         </button>
+        {error && (
+          <p role="alert" className="text-xs font-bold text-danger">
+            {error}
+          </p>
+        )}
+        <p className="text-xs text-muted">
+          Uses Claude with your own key. The key stays in this tab and is sent only to api.anthropic.com; each request is billed to your Anthropic account.
+        </p>
       </div>
-      {error && <p className="text-xs text-red-700">{error}</p>}
-      <p className="text-xs text-gray-500">
-        Uses Claude with your own key. The key stays in this tab and is sent only to api.anthropic.com; each request is billed to your Anthropic account.
-      </p>
-    </div>
+    </details>
   );
 }
