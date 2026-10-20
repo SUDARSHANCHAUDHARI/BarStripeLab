@@ -6,12 +6,11 @@
 # Core barcode engine
 /lib/barcode.ts @SUDARSHANCHAUDHARI
 /lib/columnMapper.ts @SUDARSHANCHAUDHARI
-/lib/artEngine.ts @SUDARSHANCHAUDHARI
+/lib/svgComposer.ts @SUDARSHANCHAUDHARI
 
 # Configuration
 /package.json @SUDARSHANCHAUDHARI
 *.config.js @SUDARSHANCHAUDHARI
-.github/workflows/ @SUDARSHANCHAUDHARI
 
 # Documentation
 *.md @SUDARSHANCHAUDHARI

@@ -1,34 +1,69 @@
 # BarStripeLab
 
-Shape barcode generator. BarStripeLab cuts the bars of a real EAN-13, EAN-8, UPC-A or Code 128 barcode into a silhouette, such as a coffee cup, a cat or a palm tree, and keeps a protected band along the bottom so the code still scans.
+BarStripeLab makes EAN-13, EAN-8, UPC-A and Code 128 barcodes with a scan-safety estimate and a decode check, so you can look before you print. The twist is the shape: the bars can be cut into one of 46 silhouettes, such as a coffee cup, a cat or a palm tree.
 
-It is free, has no account and runs entirely in your browser. Exports are SVG and PNG.
+It is free, has no account and runs entirely in your browser.
 
 **Live:** https://barstripelab.pages.dev
 
 ![BarStripeLab: barcodes shaped as a coffee cup, a cat, a palm tree and a heart](public/og-image.png)
 
-## Features
+## How it works
 
-- 46 shapes in six categories: animals, food, nature, objects, people and symbols. Every shape has its own page at `/shape/<id>`.
-- Four formats: EAN-13, EAN-8 and UPC-A (digits only; the check digit is added if you leave it off) and Code 128 (letters, numbers, spaces and symbols, up to 48 characters).
-- Colour presets, a custom colour and two-stop gradients, plus quick-start templates.
-- Export as SVG (scalable artwork) or high-resolution PNG, or copy the SVG to the clipboard.
-- Shareable links: the address bar always holds the exact design.
-- Keyboard shortcuts for style, colour, SVG and PNG download, and share.
-- Optional AI styling: describe your brand and Claude suggests a shape and a colour.
+The generator is one four-step flow:
+
+1. **Number.** Type the number. The check digit is checked as you type, and the format is detected. You can choose the format yourself.
+2. **Where it will be scanned.** Shops or Amazon (Retail-safe), or phones and looks (Art). Then choose the size.
+3. **Shape.** Pick one of the 46 shapes, a colour preset or a template. Or describe a style to the AI generator.
+4. **Result.** The barcode on a product panel (coffee bag, can, snack box or swing tag), with the scan check, the decode check and the downloads.
+
+Press `/`, or use **All settings** in the header, to open every setting in one sheet.
+
+Every shape has its own page at `/shape/<id>`. There is also a [barcode tattoo page](https://barstripelab.pages.dev/barcode-tattoo), which opens in Art mode.
+
+## Formats
+
+- **EAN-13 and UPC-A**: digits only. Leave off the check digit and it is added: 12 digits for EAN-13, 11 for UPC-A.
+- **EAN-8**: 7 or 8 digits.
+- **Code 128**: letters, numbers, spaces and symbols (printable ASCII), up to 48 characters. Accents and emoji are refused.
+
+EAN-13, EAN-8 and UPC-A print from 80% to 200% of the standard size (module width X = 0.330 mm at 100%). Code 128 module width is 0.19 mm to 1.00 mm. Bar width reduction, from 0 to 0.10 mm, makes the bars thinner to allow for ink spread. Ask your printer what to set.
 
 ## Scan safety
 
-- **Protected band.** The bottom of the barcode keeps every bar at full height, whatever the shape. Do not crop, cover or squash it.
-- **Quiet zones.** Blank margins are added on both sides to the GS1 minimum for EAN/UPC and the ISO/IEC 15417 minimum for Code 128. Keep them when you place the artwork.
-- **Contrast warning.** A warning appears under the colour controls when the lightest bars are too pale to scan reliably. Dark bars on a light background read best.
-- **Print and test.** Artistic bars are still bars. Print a sample at the real size, on the real material, and scan it with the devices your customers and shops use before a full run.
-- **GS1 numbers.** Retailers expect numbers licensed to your company by GS1. BarStripeLab draws whatever digits you enter; it cannot issue or register a number.
+- **Retail-safe** (the default): every bar keeps full height along the bottom band, and the shape sits above it. Use it for shops and Amazon.
+- **Art**: the shape gets more room, and the bars are shorter. Phones read them. Strict checkout scanners may not.
+- **Quiet zones**: blank margins on both sides, at least the minimum for the format (GS1 for EAN and UPC, ISO/IEC 15417 for Code 128). Keep them clear when you place the artwork.
+- **Scan check**: a 0 to 100 estimate from the design. It weighs red-light contrast, bar height, quiet zones, print size, digits and camera contrast. 80 and above is "likely fine", 50 to 79 is "risky", and below 50 is "likely to fail". A colour that looks white to red-laser scanners caps the score at 20.
+- **Decode check**: the app draws the barcode and decodes it in your browser. The result must equal your number.
+- **Contrast warnings**: a warning appears when the bars are too pale to scan, and another when the colour is red, orange or pink.
 
-## AI generator (bring your own key)
+Honest limits:
 
-The AI generator is optional and uses the Claude model `claude-opus-5-5` with your own Anthropic API key. The key stays in the browser tab's memory, is never stored, and is sent only to `api.anthropic.com`. Requests are billed to your Anthropic account. Everything else works without a key.
+- The scan check is an estimate from the design. It is not a GS1 verification. GS1 does not endorse decorated barcodes.
+- The red-light check uses screen colours as a stand-in for printed ink. It is not a print test.
+- The decode check reads your browser's rendering, not a checkout scanner.
+- Print one copy at the real size, on the real material, and scan it with the scanners your customers and shops use, before a full run.
+- Retailers expect numbers licensed to your company by GS1. BarStripeLab draws the digits you enter. It cannot issue or register a number.
+
+## Exports
+
+- **SVG**: vector artwork. Its width and height are set in millimetres, so it opens at the printed size. You can also copy the SVG to the clipboard.
+- **PDF**: the same artwork at the printed size.
+- **PNG**: 150, 300 or 600 dpi (300 by default). The file records its dpi, so print apps use it.
+- **Spec sheet PDF**: the design, the scan check and the sizes, for your printer. It is an estimate, not a verification.
+- **Many barcodes**: paste a list, or a CSV (the first column). Up to 500 numbers are used. You get a ZIP with one SVG per number, and a PDF per number if you tick the box.
+- **Share links**: the address bar always holds the whole design, so the link reproduces the exact barcode.
+
+Keyboard shortcuts, held with Option (Alt): S changes the shape, C changes the colour preset, D downloads the SVG, P downloads the PNG, and H shares.
+
+## Privacy and the AI generator
+
+The barcode is drawn in your browser. The source has no analytics code. The site is served by Cloudflare Pages, which handles the page requests.
+
+The last design is kept in your browser's local storage, so "Continue where you left off" works. Clear the site's data to remove it.
+
+The AI generator is optional. It asks Claude (`claude-opus-5-5`) to suggest a shape and a colour from a short description. Paste your own Anthropic API key. The key stays in the page's memory and is never stored. The key and your description go only to api.anthropic.com, and each request is billed to your Anthropic account. Everything else works without a key.
 
 ## Shapes and licenses
 
@@ -47,17 +82,21 @@ pnpm lint         # next lint
 pnpm build        # static export to out/
 ```
 
-No environment variables are needed. `.env.example` documents the one optional setting.
+No environment variables are needed. `.env.example` documents the one optional setting, `BASE_PATH`, for serving the export from a sub-path.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add a shape or a template.
 
 ## Deployment
 
-The site is a Next.js static export (`output: "export"`) deployed by Cloudflare Pages from the `main` branch.
+The site is a Next.js static export (`output: "export"`). Cloudflare Pages builds it from the `main` branch with:
 
 - Build command: `pnpm build`
 - Build output directory: `out`
 - Node version: `20.19.6`
 
-`public/_headers` sets the security headers (including the Content-Security-Policy) and long-lived caching for `/_next/static/*`. The sitemap (`/sitemap.xml`) and `robots.txt` are generated at build time.
+The Cloudflare Pages settings are in the Cloudflare dashboard, not in this repo.
+
+`public/_headers` sets the security headers, including the Content-Security-Policy, and long-lived caching for `/_next/static/*`. The sitemap (`/sitemap.xml`) and `robots.txt` are generated at build time.
 
 ---
 

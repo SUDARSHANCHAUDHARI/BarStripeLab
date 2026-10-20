@@ -3,6 +3,8 @@
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
+#  script-src needs 'unsafe-inline': Next.js writes inline <script> blocks into the static export.
+#  style-src needs 'unsafe-inline': Next.js writes an inline <style> block and style attributes into 404.html, and React style props.
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.anthropic.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
 
 /_next/static/*
