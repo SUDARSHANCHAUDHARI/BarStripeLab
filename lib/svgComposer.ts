@@ -2,7 +2,7 @@ import type {
   BarcodeFormat,
   ColorConfig,
   Column,
-  Style,
+  ModifierId,
   SilhouetteDefinition,
 } from "@/types";
 import { extractColumns } from "@/lib/columnMapper";
@@ -341,11 +341,12 @@ function buildPalmArtBars(
 
 export function composeBarcodeSvg(
   rawBarcodeSvg: string,
-  selectedStyle: string | Style | SilhouetteDefinition,
+  selectedStyle: string | SilhouetteDefinition,
   colorConfig: ColorConfig,
   seed: string,
   barcodeValue: string,
-  format: BarcodeFormat
+  format: BarcodeFormat,
+  modifierId?: ModifierId
 ): string {
   const { width, height: sourceHeight } = parseViewBox(rawBarcodeSvg);
   const styleDefinition = resolveStyleDefinition(selectedStyle);
@@ -368,7 +369,7 @@ export function composeBarcodeSvg(
   const artHeight = scanZoneY;
   const renderedSilhouette = renderSilhouette(
     selectedStyle,
-    isPalmLayout ? "organic" : "smooth",
+    modifierId ?? (isPalmLayout ? "organic" : "smooth"),
     width,
     artHeight
   );

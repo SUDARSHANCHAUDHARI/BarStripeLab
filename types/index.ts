@@ -5,25 +5,6 @@ export type Column = {
   isBlack: boolean;
 };
 
-export type Shape =
-  | { type: "rect"; height: number }
-  | { type: "triangle"; height: number }
-  | { type: "curve"; height: number };
-
-export type Style = Shape[];
-
-export type Template = {
-  name: string;
-  color: string;
-  style: Style;
-};
-
-export type ArtShape = {
-  x: number;
-  width: number;
-  shape: Shape;
-} | null;
-
 export type BarcodeFormat = "ean13" | "ean8" | "code128";
 
 export type ColorMode = "preset" | "custom" | "gradient";
@@ -89,10 +70,13 @@ export type RenderedSilhouette = {
   path: string;
 };
 
-export type ComposedSvgOptions = {
-  rawBarcodeSvg: string;
-  selectedStyle: string | Style | SilhouetteDefinition;
-  colorConfig: ColorConfig;
-  modifierId?: ModifierId;
-  seed?: string;
+// A complete look: what templates and the AI generator both produce.
+export type StylePreset = {
+  style: SilhouetteStyleId;
+  modifier: ModifierId;
+  color: string;
+};
+
+export type Template = StylePreset & {
+  name: string;
 };

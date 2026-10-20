@@ -1,4 +1,4 @@
-import type { ModifierConfig, SilhouetteDefinition } from "@/types";
+import type { ModifierConfig, SilhouetteDefinition, SilhouetteStyleId } from "@/types";
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
@@ -302,7 +302,7 @@ function whalePath(width: number, height: number, modifier: ModifierConfig): str
   ].join(" ");
 }
 
-const baseStyles: Record<string, SilhouetteDefinition> = {
+export const styles: Record<SilhouetteStyleId, SilhouetteDefinition> = {
   wave: { id: "wave", label: "Wave", buildPath: wavePath },
   mountain: { id: "mountain", label: "Mountain", buildPath: mountainPath },
   city: { id: "city", label: "City", buildPath: cityPath },
@@ -315,95 +315,12 @@ const baseStyles: Record<string, SilhouetteDefinition> = {
   whale: { id: "whale", label: "Whale", buildPath: whalePath },
 };
 
-function alias(id: string, label: string, target: keyof typeof baseStyles): SilhouetteDefinition {
-  return {
-    id,
-    label,
-    buildPath: baseStyles[target].buildPath,
-  };
+export const STYLE_IDS = Object.keys(styles) as SilhouetteStyleId[];
+
+export function isStyleId(value: string): value is SilhouetteStyleId {
+  return Object.prototype.hasOwnProperty.call(styles, value);
 }
 
-export const styles: Record<string, SilhouetteDefinition> = {
-  ...baseStyles,
-
-  minimal: alias("minimal", "Minimal", "city"),
-  flowing: alias("flowing", "Flowing", "wave"),
-  pyramid: alias("pyramid", "Pyramid", "mountain"),
-  volcano: alias("volcano", "Volcano", "mountain"),
-  forest: alias("forest", "Forest", "tree"),
-  ocean: alias("ocean", "Ocean", "wave"),
-  lightning: alias("lightning", "Lightning", "star"),
-  fire: alias("fire", "Fire", "crown"),
-  rain: alias("rain", "Rain", "wave"),
-  snow: alias("snow", "Snow", "star"),
-  castle: alias("castle", "Castle", "crown"),
-  pineapple: alias("pineapple", "Pineapple", "palm"),
-  cat: alias("cat", "Cat", "heart"),
-  banana: alias("banana", "Banana", "wave"),
-  wizard: alias("wizard", "Wizard", "star"),
-  ice_cream: alias("ice_cream", "Ice Cream", "coffee"),
-  boat: alias("boat", "Boat", "wave"),
-  house: alias("house", "House", "city"),
-  bottle: alias("bottle", "Bottle", "coffee"),
-  baseball: alias("baseball", "Baseball", "star"),
-  infinity: alias("infinity", "Infinity", "wave"),
-  organic: alias("organic", "Organic", "wave"),
-  geometric: alias("geometric", "Geometric", "city"),
-  solar: alias("solar", "Solar", "star"),
-  sunset: alias("sunset", "Sunset", "wave"),
-  desert: alias("desert", "Desert", "mountain"),
-  aurora: alias("aurora", "Aurora", "wave"),
-  digital: alias("digital", "Digital", "city"),
-  vintage: alias("vintage", "Vintage", "coffee"),
-  neon: alias("neon", "Neon", "star"),
-  cosmic: alias("cosmic", "Cosmic", "star"),
-  zen: alias("zen", "Zen", "wave"),
-  retro: alias("retro", "Retro", "city"),
-  futuristic: alias("futuristic", "Futuristic", "city"),
-  botanical: alias("botanical", "Botanical", "tree"),
-  industrial: alias("industrial", "Industrial", "city"),
-  vibrant: alias("vibrant", "Vibrant", "wave"),
-  smooth: alias("smooth", "Smooth", "wave"),
-  sharp: alias("sharp", "Sharp", "mountain"),
-  balanced: alias("balanced", "Balanced", "wave"),
-  dynamic: alias("dynamic", "Dynamic", "star"),
-  ethereal: alias("ethereal", "Ethereal", "wave"),
-  bold: alias("bold", "Bold", "crown"),
-  elegant: alias("elegant", "Elegant", "heart"),
-  playful: alias("playful", "Playful", "star"),
-  serious: alias("serious", "Serious", "city"),
-  artistic: alias("artistic", "Artistic", "wave"),
-  professional: alias("professional", "Professional", "city"),
-  creative: alias("creative", "Creative", "star"),
-  modern: alias("modern", "Modern", "city"),
-  classic: alias("classic", "Classic", "crown"),
-  trendy: alias("trendy", "Trendy", "wave"),
-  timeless: alias("timeless", "Timeless", "heart"),
-  adventurous: alias("adventurous", "Adventurous", "mountain"),
-  calm: alias("calm", "Calm", "wave"),
-  energetic: alias("energetic", "Energetic", "star"),
-  peaceful: alias("peaceful", "Peaceful", "wave"),
-  mysterious: alias("mysterious", "Mysterious", "whale"),
-  romantic: alias("romantic", "Romantic", "heart"),
-  wild: alias("wild", "Wild", "mountain"),
-  simple: alias("simple", "Simple", "city"),
-  complex: alias("complex", "Complex", "crown"),
-  harmony: alias("harmony", "Harmony", "wave"),
-  contrast: alias("contrast", "Contrast", "star"),
-  fusion: alias("fusion", "Fusion", "wave"),
-  native: alias("native", "Native", "tree"),
-  urban: alias("urban", "Urban", "city"),
-  suburban: alias("suburban", "Suburban", "city"),
-  rural: alias("rural", "Rural", "tree"),
-  tropical: alias("tropical", "Tropical", "palm"),
-  arctic: alias("arctic", "Arctic", "mountain"),
-  desert_heat: alias("desert_heat", "Desert Heat", "mountain"),
-  spring: alias("spring", "Spring", "tree"),
-  summer: alias("summer", "Summer", "wave"),
-  autumn: alias("autumn", "Autumn", "tree"),
-  winter: alias("winter", "Winter", "mountain"),
-};
-
 export function getStyleDefinition(styleId: string): SilhouetteDefinition {
-  return styles[styleId] ?? styles.wave;
+  return isStyleId(styleId) ? styles[styleId] : styles.wave;
 }

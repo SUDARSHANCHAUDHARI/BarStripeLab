@@ -3,7 +3,6 @@ import type {
   ModifierId,
   RenderedSilhouette,
   SilhouetteDefinition,
-  Style,
 } from "@/types";
 import { getStyleDefinition } from "@/lib/styles";
 
@@ -66,76 +65,22 @@ const MODIFIER_PRESETS: Record<ModifierId, ModifierConfig> = {
   },
 };
 
-const VALID_MODIFIERS = new Set<ModifierId>([
-  "minimal",
-  "smooth",
-  "sharp",
-  "geometric",
-  "organic",
-  "bold",
-  "elegant",
-]);
+export const MODIFIER_IDS = Object.keys(MODIFIER_PRESETS) as ModifierId[];
 
-function countShapeTypes(style: Style) {
-  return style.reduce(
-    (acc, shape) => {
-      acc[shape.type] += 1;
-      return acc;
-    },
-    { rect: 0, triangle: 0, curve: 0 }
-  );
-}
-
-export function inferStyleIdFromLegacyStyle(style: Style): string {
-  if (!style.length) return "wave";
-
-  const counts = countShapeTypes(style);
-
-  if (counts.curve >= 2 && counts.rect >= 1) return "coffee";
-  if (counts.curve >= 2 && counts.triangle >= 1) return "heart";
-  if (counts.triangle >= 2 && counts.rect >= 1) return "crown";
-  if (counts.rect >= counts.triangle && counts.rect >= counts.curve) return "city";
-  if (counts.triangle >= counts.curve) return "mountain";
-  return "wave";
-}
-
-export function inferModifierFromLegacyStyle(style: Style): ModifierId {
-  if (!style.length) return "smooth";
-
-  const avgHeight =
-    style.reduce((sum, shape) => sum + shape.height, 0) / style.length;
-  const counts = countShapeTypes(style);
-
-  if (counts.rect === style.length) return "minimal";
-  if (counts.triangle >= counts.curve && avgHeight > 48) return "sharp";
-  if (counts.curve >= counts.triangle && avgHeight < 36) return "elegant";
-  if (avgHeight > 55) return "bold";
-  return "smooth";
-}
-
-export function resolveModifier(modifierId?: string, fallback: ModifierId = "smooth"): ModifierId {
-  if (modifierId && VALID_MODIFIERS.has(modifierId as ModifierId)) {
-    return modifierId as ModifierId;
-  }
-  return fallback;
+export function isModifierId(value: string): value is ModifierId {
+  return Object.prototype.hasOwnProperty.call(MODIFIER_PRESETS, value);
 }
 
 export function resolveStyleDefinition(
-  selectedStyle: string | Style | SilhouetteDefinition
+  selectedStyle: string | SilhouetteDefinition
 ): SilhouetteDefinition {
-  if (Array.isArray(selectedStyle)) {
-    return getStyleDefinition(inferStyleIdFromLegacyStyle(selectedStyle));
-  }
-
-  if (typeof selectedStyle === "string") {
-    return getStyleDefinition(selectedStyle);
-  }
-
-  return selectedStyle;
+  return typeof selectedStyle === "string"
+    ? getStyleDefinition(selectedStyle)
+    : selectedStyle;
 }
 
 export function renderSilhouette(
-  selectedStyle: string | Style | SilhouetteDefinition,
+  selectedStyle: string | SilhouetteDefinition,
   modifierId: ModifierId,
   width: number,
   height: number
@@ -147,23 +92,5 @@ export function renderSilhouette(
     styleId: definition.id,
     modifierId,
     path: definition.buildPath(width, height, modifier),
-  };
-}
-
-export function resolveSelection(
-  selectedStyle: string | Style | SilhouetteDefinition,
-  modifierId?: string
-): { styleDefinition: SilhouetteDefinition; modifierId: ModifierId } {
-  if (Array.isArray(selectedStyle)) {
-    const inferredModifier = inferModifierFromLegacyStyle(selectedStyle);
-    return {
-      styleDefinition: getStyleDefinition(inferStyleIdFromLegacyStyle(selectedStyle)),
-      modifierId: resolveModifier(modifierId, inferredModifier),
-    };
-  }
-
-  return {
-    styleDefinition: resolveStyleDefinition(selectedStyle),
-    modifierId: resolveModifier(modifierId, "smooth"),
   };
 }

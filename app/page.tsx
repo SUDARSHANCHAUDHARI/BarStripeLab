@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import type {
   BarcodeFormat,
   ColorConfig,
-  Style,
-  Template,
-  SilhouetteDefinition,
+  ModifierId,
+  SilhouetteStyleId,
+  StylePreset,
 } from "@/types";
 import { generateBarcodeSVG } from "@/lib/barcode";
 import { generateAIStyle } from "@/lib/aiStyleGenerator";
@@ -15,22 +15,29 @@ import {
   normalizeEAN8,
   normalizeCODE128,
 } from "@/lib/ean13checksum";
-import { styles } from "@/lib/styles";
+import { STYLE_IDS } from "@/lib/styles";
+import { COLOR_PRESETS } from "@/lib/colorEngine";
 import { composeBarcodeSvg } from "@/lib/svgComposer";
+import { useKeyboardShortcuts } from "@/lib/useKeyboardShortcuts";
 
 import BarcodeCanvas from "./components/BarcodeCanvas";
 import Controls from "./components/Controls";
-import DownloadButton from "./components/DownloadButton";
+import DownloadButton, { downloadPNG, downloadSVG } from "./components/DownloadButton";
 import TemplateSelector from "./components/TemplateSelector";
 import AIInput from "./components/AIInput";
 import ColorPanel from "./components/ColorPanel";
+import ShareButton, { shareApp } from "./components/ShareButton";
+import KeyboardShortcutsInfo from "./components/KeyboardShortcutsInfo";
+
+const PRESET_IDS = Object.keys(COLOR_PRESETS);
 
 export default function Page() {
   const [value, setValue] = useState("5901234123457");
   const [format, setFormat] = useState<BarcodeFormat>("ean13");
   const [composedSvg, setComposedSvg] = useState("");
-  const [style, setStyle] = useState("palm");
-  const [customStyle, setCustomStyle] = useState<Style | null>(null);
+  const [style, setStyle] = useState<SilhouetteStyleId>("palm");
+  // null = the style's own default feel
+  const [modifier, setModifier] = useState<ModifierId | null>(null);
   const [colorConfig, setColorConfig] = useState<ColorConfig>({
     mode: "preset",
     solidColor: "#000000",
@@ -43,13 +50,9 @@ export default function Page() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [aiLoading, setAiLoading] = useState(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const activeStyle: string | Style | SilhouetteDefinition =
-    customStyle || styles[style] || styles.wave;
 
   function normalizeBarcode(
     barcodeValue: string,
@@ -100,14 +103,15 @@ export default function Page() {
         setLoading(true);
 
         const svgCode = await generateBarcodeSVG(normalized, format);
-        const seed = `${format}|${normalized}|${style}|${JSON.stringify(colorConfig)}`;
+        const seed = `${format}|${normalized}|${style}|${modifier}|${JSON.stringify(colorConfig)}`;
         const finalSvg = composeBarcodeSvg(
           svgCode,
-          activeStyle,
+          style,
           colorConfig,
           seed,
           normalized,
-          format
+          format,
+          modifier ?? undefined
         );
 
         setComposedSvg(finalSvg);
@@ -125,30 +129,38 @@ export default function Page() {
         clearTimeout(debounceTimer.current);
       }
     };
-  }, [value, format, style, activeStyle, colorConfig]);
+  }, [value, format, style, modifier, colorConfig]);
 
-  function handleTemplateSelect(template: Template): void {
-    setCustomStyle(template.style);
+  function applyPreset(preset: StylePreset): void {
+    setStyle(preset.style);
+    setModifier(preset.modifier);
     setColorConfig((prev) => ({
       ...prev,
       mode: "custom",
-      solidColor: template.color,
+      solidColor: preset.color,
     }));
   }
 
-  async function handleAIGenerate(prompt: string): Promise<void> {
-    setAiLoading(true);
-
-    try {
-      const newStyle = await generateAIStyle(prompt);
-      setCustomStyle(newStyle);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to generate AI style");
-    } finally {
-      setAiLoading(false);
-    }
+  async function handleAIGenerate(prompt: string, apiKey: string): Promise<void> {
+    applyPreset(await generateAIStyle(prompt, apiKey));
   }
+
+  useKeyboardShortcuts({
+    toggleStyle: () =>
+      setStyle((current) => STYLE_IDS[(STYLE_IDS.indexOf(current) + 1) % STYLE_IDS.length]),
+    toggleColor: () =>
+      setColorConfig((prev) => ({
+        ...prev,
+        mode: "preset",
+        presetId:
+          PRESET_IDS[(PRESET_IDS.indexOf(prev.presetId) + 1) % PRESET_IDS.length],
+      })),
+    downloadSVG: () => downloadSVG(composedSvg),
+    downloadPNG: () => downloadPNG(canvasRef.current),
+    share: () => {
+      shareApp();
+    },
+  });
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -169,11 +181,9 @@ export default function Page() {
             format={format}
             setFormat={setFormat}
             style={style}
-            setStyle={(nextStyle: string) => {
-              setStyle(nextStyle);
-              setCustomStyle(null);
-            }}
-            stylesList={Object.keys(styles)}
+            setStyle={setStyle}
+            modifier={modifier}
+            setModifier={setModifier}
           />
 
           <ColorPanel
@@ -181,12 +191,9 @@ export default function Page() {
             setColorConfig={setColorConfig}
           />
 
-          <TemplateSelector onSelect={handleTemplateSelect} />
+          <TemplateSelector onSelect={applyPreset} />
 
-          <AIInput
-            onGenerate={handleAIGenerate}
-            isLoading={aiLoading}
-          />
+          <AIInput onGenerate={handleAIGenerate} />
 
           {error && (
             <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
@@ -216,6 +223,11 @@ export default function Page() {
               </div>
             </>
           )}
+
+          <div className="mt-6 space-y-3">
+            <ShareButton />
+            <KeyboardShortcutsInfo />
+          </div>
         </div>
 
         <div className="text-center mt-8 text-sm text-gray-600">

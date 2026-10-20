@@ -14,6 +14,7 @@
     "deploy:gh": "pnpm export && touch out/.nojekyll && gh-pages -d out"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.135.0",
     "bwip-js": "^4.11.2",
     "html-to-image": "^1.11.13",
     "next": "14.2.35",

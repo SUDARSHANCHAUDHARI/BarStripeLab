@@ -1,15 +1,18 @@
 "use client";
 
-import type { BarcodeFormat } from "@/types";
+import type { BarcodeFormat, ModifierId, SilhouetteStyleId } from "@/types";
+import { STYLE_IDS, styles } from "@/lib/styles";
+import { MODIFIER_IDS } from "@/lib/artEngine";
 
 interface ControlsProps {
   value: string;
   setValue: (value: string) => void;
   format: BarcodeFormat;
   setFormat: (format: BarcodeFormat) => void;
-  style: string;
-  setStyle: (style: string) => void;
-  stylesList: string[];
+  style: SilhouetteStyleId;
+  setStyle: (style: SilhouetteStyleId) => void;
+  modifier: ModifierId | null;
+  setModifier: (modifier: ModifierId | null) => void;
 }
 
 export default function Controls({
@@ -19,7 +22,8 @@ export default function Controls({
   setFormat,
   style,
   setStyle,
-  stylesList,
+  modifier,
+  setModifier,
 }: ControlsProps) {
   const getPlaceholderByFormat = () => {
     switch (format) {
@@ -97,11 +101,31 @@ export default function Controls({
         <select
           className="border border-gray-300 p-3 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={style}
-          onChange={(e) => setStyle(e.target.value)}
+          onChange={(e) => setStyle(e.target.value as SilhouetteStyleId)}
         >
-          {stylesList.map((s) => (
-            <option key={s} value={s}>
-              {s.charAt(0).toUpperCase() + s.slice(1)}
+          {STYLE_IDS.map((id) => (
+            <option key={id} value={id}>
+              {styles[id].label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Shape Feel
+        </label>
+        <select
+          className="border border-gray-300 p-3 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={modifier ?? ""}
+          onChange={(e) =>
+            setModifier(e.target.value ? (e.target.value as ModifierId) : null)
+          }
+        >
+          <option value="">Auto</option>
+          {MODIFIER_IDS.map((id) => (
+            <option key={id} value={id}>
+              {id.charAt(0).toUpperCase() + id.slice(1)}
             </option>
           ))}
         </select>

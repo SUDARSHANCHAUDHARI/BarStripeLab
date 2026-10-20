@@ -1,40 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface ShareButtonProps {
   title?: string;
   url?: string;
 }
 
+const DEFAULT_TITLE = "Check out BarStripeLab - Turn barcodes into brand assets!";
+
+async function copyToClipboard(url: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(url);
+    return true;
+  } catch (err) {
+    console.error("Copy link failed:", err);
+    return false;
+  }
+}
+
+// Native share sheet when available, otherwise copy the link.
+export async function shareApp(
+  url = window.location.href,
+  title = DEFAULT_TITLE
+): Promise<"shared" | "copied" | "failed"> {
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: "BarStripeLab", text: title, url });
+      return "shared";
+    } catch {
+      return "failed"; // user cancelled the share sheet
+    }
+  }
+
+  return (await copyToClipboard(url)) ? "copied" : "failed";
+}
+
 export default function ShareButton({
-  title = "Check out BarStripeLab - Turn barcodes into brand assets!",
+  title = DEFAULT_TITLE,
   url = typeof window !== "undefined" ? window.location.href : "",
 }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
+  // Checked after mount so the static HTML and the first client render match.
+  const [canShare, setCanShare] = useState(false);
+
+  useEffect(() => {
+    setCanShare("share" in navigator);
+  }, []);
 
   async function shareNative() {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "BarStripeLab",
-          text: title,
-          url,
-        });
-      } catch (err) {
-        console.log("Share cancelled");
-      }
-      return;
-    }
-
-    // Fallback: copy to clipboard
-    copyLink();
+    await shareApp(url, title);
   }
 
-  function copyLink() {
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  async function copyLink() {
+    if (await copyToClipboard(url)) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   }
 
   function shareTwitter() {
@@ -59,11 +81,11 @@ export default function ShareButton({
 
   return (
     <div className="flex gap-2 flex-wrap">
-      {typeof navigator !== "undefined" && "share" in navigator ? (
+      {canShare ? (
         <button
           onClick={shareNative}
           className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm font-medium transition"
-          title="Share (Ctrl+Shift+S)"
+          title="Share (Alt+H)"
         >
           📤 Share
         </button>
@@ -100,7 +122,7 @@ export default function ShareButton({
             ? "bg-green-600 text-white"
             : "bg-gray-600 hover:bg-gray-700 text-white"
         }`}
-        title="Copy link (Ctrl+Shift+C)"
+        title="Copy link"
       >
         {copied ? "✓ Copied!" : "🔗 Copy"}
       </button>
