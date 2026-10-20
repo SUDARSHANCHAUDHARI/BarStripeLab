@@ -1,11 +1,24 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SHAPES } from "@/lib/shapes";
+import { SITE_URL } from "./site";
 import SiteHeader from "./components/SiteHeader";
 import SiteFooter from "./components/SiteFooter";
 
+const TITLE = "BarStripeLab — Shape Barcode Generator";
+const DESCRIPTION = `Turn EAN-13, EAN-8, UPC-A and Code 128 barcodes into ${SHAPES.length} shapes that still scan. Free, runs in your browser, exports SVG and PNG. Optional AI styling with your own Anthropic key.`;
+const OG_IMAGE = {
+  url: "/og-image.png",
+  width: 1200,
+  height: 630,
+  alt: "BarStripeLab: barcodes shaped as a coffee cup, a cat, a palm tree and a heart",
+};
+
 export const metadata: Metadata = {
-  title: "BarStripeLab - Turn Barcodes Into Brand Assets",
-  description: "Create artistic, scannable barcodes with custom styles and colors.",
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/" },
   manifest: "/manifest.json",
   icons: {
     icon: "/favicon.svg",
@@ -18,34 +31,29 @@ export const metadata: Metadata = {
     title: "BarStripeLab",
   },
   openGraph: {
-    title: "BarStripeLab - Barcode Art Generator",
-    description: "Transform boring barcodes into beautiful brand assets",
+    title: TITLE,
+    description: DESCRIPTION,
     type: "website",
     locale: "en_US",
-    url: "https://sudarshanchaudhari.github.io/BarStripeLab",
+    url: "/",
     siteName: "BarStripeLab",
-    images: [
-      {
-        url: "https://sudarshanchaudhari.github.io/BarStripeLab/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "BarStripeLab - Turn barcodes into brand assets",
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BarStripeLab",
-    description: "Turn barcodes into brand assets",
-    images: ["https://sudarshanchaudhari.github.io/BarStripeLab/og-image.png"],
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [OG_IMAGE],
   },
   keywords: [
     "barcode",
     "barcode generator",
     "barcode art",
-    "branding",
-    "design tool",
+    "shape barcode",
     "EAN-13",
+    "EAN-8",
+    "UPC-A",
+    "Code 128",
   ],
   authors: [{ name: "Sudarshan Chaudhari", url: "https://github.com/SUDARSHANCHAUDHARI" }],
 };

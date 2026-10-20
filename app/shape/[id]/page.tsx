@@ -18,9 +18,17 @@ export function generateStaticParams() {
 
 export function generateMetadata({ params }: ShapePageProps): Metadata {
   const shape = getShape(params.id);
+  const title = `${shape.label} Barcode Generator — BarStripeLab`;
+  const description = `${shape.description} Free shape barcode for EAN-13, EAN-8, UPC-A and Code 128, exported as SVG or PNG.`;
+  const url = `/shape/${shape.id}`;
+  // A page's openGraph and twitter replace the layout's, so the image is repeated here.
+  const images = [{ url: "/og-image.png", width: 1200, height: 630, alt: `${shape.label} barcode by BarStripeLab` }];
   return {
-    title: `${shape.label} Barcode Generator — BarStripeLab`,
-    description: shape.description,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title, description, url, type: "website", siteName: "BarStripeLab", images },
+    twitter: { card: "summary_large_image", title, description, images },
   };
 }
 

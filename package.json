@@ -5,13 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "export": "BASE_PATH=/barstripelab next build",
-    "deploy:gh": "pnpm export && touch out/.nojekyll && gh-pages -d out"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.135.0",
