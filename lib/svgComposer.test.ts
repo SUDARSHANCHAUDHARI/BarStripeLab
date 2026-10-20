@@ -24,7 +24,8 @@ async function compose(value: string, format: BarcodeFormat, color = baseColor, 
     format,
   });
   const [, , width, height] = svg.match(/viewBox="([^"]+)"/)![1].split(" ").map(Number);
-  const firstBarX = Number(svg.match(/<path d="M([\d.]+) /)?.[1]);
+  // The bars path is the one carrying the mask; shape paths sit inside <mask>.
+  const firstBarX = Number(svg.match(/<path d="M([\d.]+) [^"]*" fill="[^"]*" mask=/)?.[1]);
   const mask = svg.match(/<mask[\s\S]*?<\/mask>/)?.[0] ?? "";
   const band = mask.match(/<rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)" fill="white"\/><\/mask>/);
   const [bandX, bandY, bandWidth, bandHeight] = band ? band.slice(1).map(Number) : [];
