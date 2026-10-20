@@ -1,8 +1,10 @@
 "use client";
 
+import { useId } from "react";
 import { COLOR_PRESETS, failsRedLight, lowestBarContrast, safeColor } from "@/lib/colorEngine";
 import type { ColorConfig } from "@/types";
 import Segmented from "./Segmented";
+import { BTN_OUTLINE, FIELD, FOCUS, HINT, LABEL } from "./flow/ui";
 
 interface ColorPanelProps {
   colorConfig: ColorConfig;
@@ -18,9 +20,10 @@ const GRADIENT_KINDS = [
 const pickerValue = (color: string | undefined, fallback: string) =>
   /^#[0-9a-f]{6}$/i.test(color ?? "") ? (color as string) : fallback;
 
-const PICKER = "h-10 w-14 cursor-pointer border-2 border-ink bg-white p-0";
+const PICKER = `h-11 w-14 cursor-pointer rounded-lg border-2 border-ink-2 bg-card p-0.5 ${FOCUS}`;
 
 export default function ColorPanel({ colorConfig, setColorConfig }: ColorPanelProps) {
+  const id = useId();
   const { mode } = colorConfig;
   const isValidColor = safeColor(colorConfig.solidColor, "") !== "";
   const [from, to] = [colorConfig.gradientStops[0], colorConfig.gradientStops[1]];
@@ -37,10 +40,10 @@ export default function ColorPanel({ colorConfig, setColorConfig }: ColorPanelPr
   return (
     <div className="space-y-4">
       <div>
-        <span id="color-label" className="field-label">
-          Color
+        <span id={`${id}-label`} className={LABEL}>
+          Bar colour
         </span>
-        <div role="group" aria-labelledby="color-label" className="mt-2 flex flex-wrap gap-2">
+        <div role="group" aria-labelledby={`${id}-label`} className="flex flex-wrap gap-2">
           {Object.entries(COLOR_PRESETS).map(([id, color]) => {
             const selected = mode === "preset" && colorConfig.presetId === id;
             return (
@@ -51,28 +54,34 @@ export default function ColorPanel({ colorConfig, setColorConfig }: ColorPanelPr
                 aria-label={id.replace(/_/g, " ")}
                 title={id.replace(/_/g, " ")}
                 onClick={() => setColorConfig({ ...colorConfig, mode: "preset", presetId: id })}
-                className="flex h-10 w-10 items-center justify-center border-2 border-ink"
+                className={`flex h-11 w-11 items-center justify-center rounded-full border-2 ${
+                  selected ? "border-ink ring-2 ring-inset ring-card" : "border-rule"
+                } ${FOCUS}`}
                 style={{ backgroundColor: color }}
               >
-                {selected && <span aria-hidden="true" className="block h-3 w-3 border-2 border-ink bg-white" />}
+                {selected && (
+                  <svg viewBox="0 0 18 18" className="h-4 w-4 text-card" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true" focusable="false">
+                    <path d="M3 9.5l4 4 8-9" />
+                  </svg>
+                )}
               </button>
             );
           })}
         </div>
-        <div className="mt-2 grid grid-cols-2 gap-2">
+        <div className="mt-2 flex flex-wrap gap-2">
           <button
             type="button"
             aria-pressed={mode === "custom"}
             onClick={() => setColorConfig({ ...colorConfig, mode: "custom" })}
-            className="btn"
+            className={BTN_OUTLINE}
           >
-            Custom color
+            Custom colour
           </button>
           <button
             type="button"
             aria-pressed={mode === "gradient"}
             onClick={() => setColorConfig({ ...colorConfig, mode: "gradient" })}
-            className="btn"
+            className={BTN_OUTLINE}
           >
             Gradient
           </button>
@@ -83,28 +92,33 @@ export default function ColorPanel({ colorConfig, setColorConfig }: ColorPanelPr
         <div className="flex items-end gap-2">
           <input
             type="color"
-            aria-label="Pick a bar color"
+            aria-label="Pick a bar colour"
             value={pickerValue(colorConfig.solidColor, "#000000")}
             onChange={(e) => setColorConfig({ ...colorConfig, solidColor: e.target.value })}
             className={PICKER}
           />
           <div className="flex-1">
-            <label htmlFor="color-hex" className="field-label">
+            <label htmlFor={`${id}-hex`} className={LABEL}>
               Hex code
             </label>
             <input
-              id="color-hex"
+              id={`${id}-hex`}
               type="text"
               spellCheck={false}
               autoComplete="off"
               value={colorConfig.solidColor}
               onChange={(e) => setColorConfig({ ...colorConfig, solidColor: e.target.value })}
               aria-invalid={!isValidColor}
-              title={isValidColor ? undefined : "Use a hex color like #1DB954"}
-              className={`field mt-1 py-2 ${isValidColor ? "" : "outline outline-2 outline-danger"}`}
+              aria-describedby={isValidColor ? undefined : `${id}-hex-error`}
+              className={FIELD}
             />
           </div>
         </div>
+      )}
+      {mode === "custom" && !isValidColor && (
+        <p id={`${id}-hex-error`} className="text-sm font-bold text-warn">
+          Use a hex code like #1DB954.
+        </p>
       )}
 
       {mode === "gradient" && (
@@ -117,7 +131,7 @@ export default function ColorPanel({ colorConfig, setColorConfig }: ColorPanelPr
           />
           <div className="flex gap-6">
             {([0, 1] as const).map((index) => (
-              <label key={index} className="field-label">
+              <label key={index} className={LABEL}>
                 {index === 0 ? "From" : "To"}
                 <input
                   type="color"
@@ -135,19 +149,19 @@ export default function ColorPanel({ colorConfig, setColorConfig }: ColorPanelPr
       )}
 
       {failsRedLight(colorConfig) && (
-        <p role="status" className="notice">
-          <strong className="font-black uppercase">Invisible to laser scanners.</strong> Red, orange
-          and pink bars look white under the red light checkout scanners use. Pick black, navy,
-          dark green or another color with little red.
+        <p role="status" className="rounded-xl bg-warn-bg px-4 py-3 text-base text-warn">
+          <strong>Red-laser scanners can&apos;t see these bars.</strong> Red, orange and pink look white under the red
+          light checkout scanners use. Pick black, navy, dark green or another colour with little red.
         </p>
       )}
 
       {!failsRedLight(colorConfig) && lowestBarContrast(colorConfig) < 3 && (
-        <p role="status" className="notice">
-          <strong className="font-black uppercase">Low contrast.</strong> Light bars may not scan.
-          Pick a darker color so the bars stand out clearly from the white background.
+        <p role="status" className="rounded-xl bg-warn-bg px-4 py-3 text-base text-warn">
+          <strong>Low contrast.</strong> Light bars may not scan. Pick a darker colour so the bars stand out clearly
+          from the white background.
         </p>
       )}
+      <p className={HINT}>Dark bars on white scan best.</p>
     </div>
   );
 }

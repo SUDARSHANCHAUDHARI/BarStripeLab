@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { FOCUS } from "./flow/ui";
 
 interface SegmentedProps<T extends string> {
   label: string;
@@ -19,14 +20,13 @@ export default function Segmented<T extends string>({
 
   return (
     <div>
-      <span id={labelId} className="field-label">
+      <span id={labelId} className="mb-1.5 block text-sm font-bold text-ink">
         {label}
       </span>
       <div
         role="group"
         aria-labelledby={labelId}
-        className="mt-2 grid gap-2"
-        style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
+        className="inline-flex flex-wrap gap-1 rounded-full border-[1.5px] border-rule bg-card p-1"
       >
         {options.map((option) => (
           <button
@@ -34,7 +34,7 @@ export default function Segmented<T extends string>({
             type="button"
             aria-pressed={value === option.value}
             onClick={() => onChange(option.value)}
-            className="btn px-1"
+            className={`min-h-[44px] rounded-full px-4 text-base font-bold text-ink-2 hover:text-ink aria-pressed:bg-ink aria-pressed:text-card ${FOCUS}`}
           >
             {option.label}
           </button>
