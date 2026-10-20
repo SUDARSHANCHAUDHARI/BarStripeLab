@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { SHAPES, SHAPE_IDS, getShape } from "@/lib/shapes";
 import Generator from "../../components/Generator";
-import InfoSections from "../../components/InfoSections";
-import ShapeThumb from "../../components/ShapeThumb";
+import InfoSections, { ShapeLinks } from "../../components/InfoSections";
 
 interface ShapePageProps {
   params: { id: string };
@@ -40,38 +38,23 @@ export default function ShapePage({ params }: ShapePageProps) {
   );
 
   return (
-    <main className="mx-auto max-w-5xl px-4 pb-8 sm:px-6">
-      <div className="mb-8 max-w-2xl">
-        <h1 className="text-lg font-black uppercase text-ink">{shape.label} barcode generator</h1>
-        <p className="mt-1 text-muted">
-          {shape.description} Your barcode is cut into the {shape.label.toLowerCase()} silhouette
-          while the protected band at the bottom keeps it scannable.
+    <main id="main" className="mx-auto max-w-5xl px-4 pb-8 sm:px-6">
+      <div className="pb-10 pt-10 sm:pt-16">
+        <h1 className="max-w-[20ch] text-[clamp(40px,5.4vw,68px)] leading-[1.02]">
+          {shape.label} barcode generator
+        </h1>
+        <p className="mt-4 max-w-[52ch] text-xl text-ink-2">
+          {shape.description} Choose Retail-safe and the bars stay full height under the{" "}
+          {shape.label.toLowerCase()}, or Art for a bolder cut.
         </p>
       </div>
       <Generator initialShape={shape.id} />
 
-      {others.length > 0 && (
-        <nav aria-labelledby="more-shapes-title" className="mt-16 space-y-4">
-          <h2 id="more-shapes-title" className="text-lg font-black uppercase text-ink">
-            More shapes
-          </h2>
-          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-            {others.map((s) => (
-              <li key={s.id}>
-                <Link
-                  href={`/shape/${s.id}`}
-                  className="btn flex min-h-[44px] items-center gap-2 px-2 leading-tight"
-                >
-                  <ShapeThumb shape={s} className="h-6 w-6 shrink-0" />
-                  <span className="min-w-0 break-words">{s.label}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      )}
-
-      <InfoSections />
+      <InfoSections>
+        {others.length > 0 && (
+          <ShapeLinks titleId="more-shapes-title" title="More shapes" shapes={others} />
+        )}
+      </InfoSections>
     </main>
   );
 }
