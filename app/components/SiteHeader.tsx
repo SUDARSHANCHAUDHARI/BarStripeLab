@@ -58,8 +58,8 @@ export default function SiteHeader() {
 
   return (
     <header className="border-b border-rule">
-      <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6 lg:gap-8">
-        <Link href="/" className="flex items-center gap-2.5 font-display text-[22px] font-bold leading-none text-ink">
+      <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:gap-4 sm:px-6 lg:gap-8">
+        <Link href="/" className="flex shrink-0 items-center gap-2 font-display text-[18px] font-bold leading-none text-ink sm:gap-2.5 sm:text-[22px]">
           <svg viewBox="0 0 20 16" className="h-4 w-5" fill="currentColor" aria-hidden="true" focusable="false">
             <rect x="0" width="2" height="16" />
             <rect x="4" width="1" height="16" />
@@ -87,9 +87,11 @@ export default function SiteHeader() {
             type="button"
             onClick={() => openPanel("settings", router)}
             aria-keyshortcuts="/"
-            className="flex min-h-[44px] items-center gap-2 rounded-full border-[1.5px] border-ink px-4 font-mono text-[15px] font-medium text-ink hover:bg-card"
+            className="flex min-h-[44px] items-center gap-2 rounded-full border-[1.5px] border-ink px-3 font-mono text-[15px] font-medium text-ink hover:bg-card sm:px-4"
           >
-            All settings
+            {/* Short label on phones so the header fits 360 px without sideways scroll. */}
+            <span className="sm:hidden">Settings</span>
+            <span className="hidden sm:inline">All settings</span>
             <kbd className="hidden rounded-[5px] border border-b-2 border-rule bg-board px-1.5 py-0.5 text-[13px] sm:inline">/</kbd>
           </button>
           <button
@@ -97,7 +99,7 @@ export default function SiteHeader() {
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"
-            className="min-h-[44px] rounded-full px-4 text-base font-bold text-ink hover:bg-card lg:hidden"
+            className="min-h-[44px] rounded-full px-3 text-base font-bold text-ink hover:bg-card sm:px-4 lg:hidden"
           >
             Menu
           </button>
