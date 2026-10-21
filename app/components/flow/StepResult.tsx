@@ -40,7 +40,7 @@ export default function StepResult({
   onSettings,
   onRestart,
 }: StepResultProps) {
-  const { composed, score, decode, normalized, error } = rendered;
+  const { composed, score, decode, otherReads, normalized, error } = rendered;
   const number = normalized ?? design.value;
   const hasShape = design.shape !== NO_SHAPE_ID;
   const shapeLabel = shapeFor(design.shape).label;
@@ -83,7 +83,7 @@ export default function StepResult({
             <p className="mt-1 text-sm text-ink-2">The barcode is the bars, clear space and numbers. The shape is extra.</p>
           </div>
         </div>
-        <ScanCheck score={score} decode={decode} number={number} colorConfig={design.colorConfig} />
+        <ScanCheck score={score} decode={decode} number={number} colorConfig={design.colorConfig} otherReads={otherReads} />
       </div>
 
       <h3 className="mb-3 mt-10 font-display text-2xl font-bold text-ink">Download</h3>

@@ -6,6 +6,7 @@ interface ScanCheckProps {
   score: ScanScore | null;
   decode: DecodeState;
   number: string;
+  otherReads?: string[];
   colorConfig: ColorConfig;
 }
 
@@ -40,7 +41,7 @@ function Icon({ kind }: { kind: "ok" | "warn" }) {
   );
 }
 
-export default function ScanCheck({ score, decode, number, colorConfig }: ScanCheckProps) {
+export default function ScanCheck({ score, decode, number, colorConfig, otherReads = [] }: ScanCheckProps) {
   const redLight = failsRedLight(colorConfig);
   const lowContrast = !redLight && lowestBarContrast(colorConfig) < 3;
   const colourNotice = redLight || lowContrast;
@@ -107,6 +108,16 @@ export default function ScanCheck({ score, decode, number, colorConfig }: ScanCh
             <Icon kind="ok" />
             <span>
               Decode check: we read <span className="font-mono">{number}</span> back from the picture.
+            </span>
+          </p>
+        )}
+        {decode === "ok" && otherReads.length > 0 && (
+          <p role="alert" className="mt-3 flex gap-2 rounded-xl bg-warn-bg px-4 py-3 text-warn">
+            <Icon kind="warn" />
+            <span>
+              <strong>A phone could read a different number.</strong> A scan line through the shape also reads as{" "}
+              <span className="font-mono">{otherReads.join(", ")}</span>. Scanner apps may show that instead. Try
+              another shape, or tell people to scan across the bottom band.
             </span>
           </p>
         )}
