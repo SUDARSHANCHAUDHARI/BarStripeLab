@@ -68,4 +68,4 @@ sits next to it in `public/fonts`.
 
 ## ZXing (TypeScript port)
 
-The phone-read check uses `@zxing/library` 0.23.0 (https://github.com/zxing-js/library), licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0). It is loaded only when the scan check runs and is used unmodified.
+The phone-read check uses `@zxing/library` 0.21.3 (https://github.com/zxing-js/library), licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0). It is loaded only when the scan check runs and is used unmodified.
