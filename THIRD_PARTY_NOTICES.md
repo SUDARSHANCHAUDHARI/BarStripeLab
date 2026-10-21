@@ -65,3 +65,7 @@ sits next to it in `public/fonts`.
 - Bricolage Grotesque (`BricolageGrotesque-Bold.woff2`): Copyright 2022 The Bricolage Grotesque Project Authors (https://github.com/ateliertriay/bricolage). License: `public/fonts/OFL-BricolageGrotesque.txt`
 - Atkinson Hyperlegible Next (`AtkinsonHyperlegibleNext-wght.woff2`): Copyright 2020-2024 The Atkinson Hyperlegible Next Project Authors (https://github.com/googlefonts/atkinson-hyperlegible-next). License: `public/fonts/OFL-AtkinsonHyperlegibleNext.txt`
 - IBM Plex Mono (`IBMPlexMono-Regular-Latin1.woff2`, `IBMPlexMono-Medium-Latin1.woff2`): Copyright © 2017 IBM Corp. with Reserved Font Name "Plex". License: `public/fonts/OFL-IBMPlexMono.txt`
+
+## ZXing (TypeScript port)
+
+The phone-read check uses `@zxing/library` 0.23.0 (https://github.com/zxing-js/library), licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0). It is loaded only when the scan check runs and is used unmodified.

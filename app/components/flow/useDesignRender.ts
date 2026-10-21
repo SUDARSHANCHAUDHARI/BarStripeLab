@@ -6,6 +6,7 @@ import type { Design } from "@/lib/urlState";
 import { BARCODE_SCALE, generateBarcodeSVG } from "@/lib/barcode";
 import { composeBarcode } from "@/lib/svgComposer";
 import { decodeComposed } from "@/lib/decode";
+import { phoneOtherReads } from "@/lib/phoneRead";
 import { detectFormat } from "@/lib/formatDetect";
 import { scanScore } from "@/lib/scanScore";
 import { NO_SHAPE, shapeFor } from "./design";
@@ -23,6 +24,8 @@ export type Rendered = {
   plain: ComposedBarcode | null;
   score: ScanScore | null;
   decode: DecodeState;
+  // Other numbers a phone app could read from a scan line through the shape.
+  otherReads: string[];
   error: string;
 };
 
@@ -33,6 +36,7 @@ const EMPTY: Rendered = {
   plain: null,
   score: null,
   decode: "checking",
+  otherReads: [],
   error: "",
 };
 
@@ -54,7 +58,7 @@ export function useDesignRender(design: Design, enabled: boolean): Rendered {
     }
 
     let cancelled = false;
-    setRendered((prev) => ({ ...prev, normalized, decode: "checking", error: "" }));
+    setRendered((prev) => ({ ...prev, normalized, decode: "checking", otherReads: [], error: "" }));
 
     const timer = setTimeout(async () => {
       let composed: ComposedBarcode;
@@ -74,16 +78,19 @@ export function useDesignRender(design: Design, enabled: boolean): Rendered {
         return;
       }
       if (cancelled) return;
-      setRendered({ normalized, shapeId: shape, composed, plain, score, decode: "checking", error: "" });
+      setRendered({ normalized, shapeId: shape, composed, plain, score, decode: "checking", otherReads: [], error: "" });
 
       let decode: DecodeState;
+      let otherReads: string[] = [];
       try {
         decode = (await decodeComposed(composed, format)) === normalized ? "ok" : "failed";
+        // Only shapes cut bars into partial lines; a plain barcode can't hide another code.
+        if (shape !== NO_SHAPE.id) otherReads = await phoneOtherReads(composed, format, normalized);
       } catch (err) {
         console.error("Decode error:", err);
         decode = "unavailable";
       }
-      if (!cancelled) setRendered((prev) => ({ ...prev, decode }));
+      if (!cancelled) setRendered((prev) => ({ ...prev, decode, otherReads }));
     }, DEBOUNCE_MS);
 
     return () => {

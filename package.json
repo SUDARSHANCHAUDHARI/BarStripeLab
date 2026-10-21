@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.135.0",
+    "@zxing/library": "0.23.0",
     "bwip-js": "^4.11.2",
     "next": "15.5.28",
     "react": "19.3.1",
