@@ -4,7 +4,7 @@ BarStripeLab makes EAN-13, EAN-8, UPC-A and Code 128 barcodes with a scan-safety
 
 It is free, has no account and runs entirely in your browser.
 
-**Live:** https://barstripelab.pages.dev
+**Live:** https://barstripelab.sudarshantechlabs.com
 
 ![BarStripeLab: barcodes shaped as a coffee cup, a cat, a palm tree and a heart](public/og-image.png)
 
@@ -19,7 +19,7 @@ The generator is one four-step flow:
 
 Press `/`, or use **All settings** in the header, to open every setting in one sheet.
 
-Every shape has its own page at `/shape/<id>`. There is also a [barcode tattoo page](https://barstripelab.pages.dev/barcode-tattoo), which opens in Art mode.
+Every shape has its own page at `/shape/<id>`. There is also a [barcode tattoo page](https://barstripelab.sudarshantechlabs.com/barcode-tattoo), which opens in Art mode.
 
 ## Formats
 
