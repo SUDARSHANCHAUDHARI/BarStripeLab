@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Phone-read check: the scan check reads the artwork with ZXing at phone-camera sizes and warns when a scan line through the shape could show a different number.
 - Shape-mask renderer: the bars are cut into one of 46 shapes (Phosphor Icons, MIT; game-icons.net, CC BY 3.0), with a protected full-height band and standard quiet zones.
 - UPC-A and Code 128 next to EAN-13 and EAN-8.
 - A page per shape at `/shape/<id>`, and shareable links that encode the full design.
