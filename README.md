@@ -36,6 +36,7 @@ EAN-13, EAN-8 and UPC-A print from 80% to 200% of the standard size (module widt
 - **Quiet zones**: blank margins on both sides, at least the minimum for the format (GS1 for EAN and UPC, ISO/IEC 15417 for Code 128). Keep them clear when you place the artwork.
 - **Scan check**: a 0 to 100 estimate from the design. It weighs red-light contrast, bar height, quiet zones, print size, digits and camera contrast. 80 and above is "likely fine", 50 to 79 is "risky", and below 50 is "likely to fail". A colour that looks white to red-laser scanners caps the score at 20.
 - **Decode check**: the app draws the barcode and decodes it in your browser. The result must equal your number.
+- **Phone-read check**: for shaped barcodes, the app also reads the artwork with ZXing, the engine inside many phone scanner apps, with every barcode type switched on. A scan line through the shape can hold a shorter valid code, so if ZXing reads a different number, a warning shows it.
 - **Contrast warnings**: a warning appears when the bars are too pale to scan, and another when the colour is red, orange or pink.
 
 Honest limits:
@@ -43,6 +44,7 @@ Honest limits:
 - The scan check is an estimate from the design. It is not a GS1 verification. GS1 does not endorse decorated barcodes.
 - The red-light check uses screen colours as a stand-in for printed ink. It is not a print test.
 - The decode check reads your browser's rendering, not a checkout scanner.
+- The phone-read check runs ZXing on your browser's rendering. Real phone apps use their own cameras and settings, so it catches likely misreads but cannot rule them all out.
 - Print one copy at the real size, on the real material, and scan it with the scanners your customers and shops use, before a full run.
 - Retailers expect numbers licensed to your company by GS1. BarStripeLab draws the digits you enter. It cannot issue or register a number.
 
@@ -67,7 +69,7 @@ The AI generator is optional. It asks Claude (`claude-opus-5-5`) to suggest a sh
 
 ## Shapes and licenses
 
-The shape artwork comes from [Phosphor Icons](https://phosphoricons.com) (MIT) and [game-icons.net](https://game-icons.net) (CC BY 3.0). The full licenses, credits and the changes made to each game-icons.net shape are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The app code is MIT, see [LICENSE](LICENSE).
+The shape artwork comes from [Phosphor Icons](https://phosphoricons.com) (MIT) and [game-icons.net](https://game-icons.net) (CC BY 3.0). The phone-read check uses [ZXing](https://github.com/zxing-js/library) (Apache-2.0). The full licenses, credits and the changes made to each game-icons.net shape are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The app code is MIT, see [LICENSE](LICENSE).
 
 ## Development
 
