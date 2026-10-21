@@ -28,6 +28,7 @@ describe("phoneRead", () => {
     for (const [value, format] of [
       ["5901234123457", "ean13"],
       ["96385074", "ean8"],
+      ["036000291452", "upca"],
       ["BARSTRIPE-2026", "code128"],
     ] as const) {
       const { data, width, height } = image([await symbolRows(value, format, 40)]);

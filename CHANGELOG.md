@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-21
+
 ### Added
 - Phone-read check: the scan check reads the artwork with ZXing at phone-camera sizes and warns when a scan line through the shape could show a different number.
 - Shape-mask renderer: the bars are cut into one of 46 shapes (Phosphor Icons, MIT; game-icons.net, CC BY 3.0), with a protected full-height band and standard quiet zones.
@@ -31,9 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Self-hosted fonts in `public/fonts` (Bricolage Grotesque, Atkinson Hyperlegible Next, IBM Plex Mono), licensed under the SIL Open Font License.
 
 ### Changed
-- Brutalist UI redesign. The Till Check flow replaces the single-page UI.
+- UI redesign: the guided Till Check flow replaces the single-page tool, with a new visual system.
 - Colour presets `ink_navy` and `deep_teal` replace `sunset_orange` and `neon_pink`. Orange and pink look white to red-laser scanners.
+- Next.js 14.2 to 15.5, React 18 to 19, vitest 3 to 4.1.12 (security advisories); all pinned exactly.
 - Node version pinned to 20.19.6 in `.nvmrc`, matching Cloudflare Pages.
+- Canonical URLs, social cards, the sitemap and robots use the custom domain https://barstripelab.sudarshantechlabs.com.
 - `.env.example` now documents that no environment variables are needed.
 - README and STATUS rewritten for the current product and Cloudflare Pages deployment.
 
@@ -41,11 +45,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - The `start`, `export` and `deploy:gh` scripts. `next start` does not work with a static export, and GitHub Pages is not used.
 - The style overlay engine (wave, mountain, city and similar styles), replaced by shapes.
 - `GITHUB_PAGES_SETUP.md`, `DEPLOY.md`, `QUICKSTART.md`, `PROJECT_SUMMARY.md` and `RELEASE_MEMORY.md`, which described GitHub Pages deployment and the old style engine. README covers setup and deployment.
-- `html-to-image` is no longer imported by the app. It is still listed in `package.json` on this branch.
+- Unused `html-to-image` and `gh-pages` dependencies.
 
 ### Fixed
+- Bars wider than one module were drawn 0.5 to 1.5 modules off their true position (all formats).
 - Colours are sanitised before they are written into the SVG.
 - Input limits per format.
+- CSV header rows are skipped instead of becoming barcodes.
+- No sideways scroll on phones (header at 360 to 390 px).
 
 ## [1.0.0] - 2026-04-15
 

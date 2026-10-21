@@ -6,11 +6,11 @@ Last updated: 2026-10-21
 
 The live site at https://barstripelab.sudarshantechlabs.com (also served at barstripelab.pages.dev) is built by Cloudflare Pages from `main`. The Cloudflare setting is in the dashboard, so it is not checked from this repo.
 
-The redesign is on branch `feat/real-styles-ai-shortcuts`, 34 commits ahead of `main`. The home page is a four-step flow. It takes a number, asks where the barcode will be scanned, lets you pick one of 46 shapes, and shows the result on a product panel: a coffee bag, a can, a snack box or a swing tag.
+Version 2.0.0 is on `main`. The home page is a four-step flow. It takes a number, asks where the barcode will be scanned, lets you pick one of 46 shapes, and shows the result on a product panel: a coffee bag, a can, a snack box or a swing tag.
 
 Retail-safe mode is the default. It keeps every bar at full height along the bottom band, and the shape sits above it. Art mode shortens the bars so the shape can take more room. Art mode is for phones and looks, not for strict checkout scanners.
 
-Each design gets a scan-safety estimate from 0 to 100 and an in-browser decode check. The estimate is a heuristic, not a GS1 verification.
+Each design gets a scan-safety estimate from 0 to 100, an in-browser decode check and, for shaped barcodes, a phone-read check with ZXing that warns when a scan line through the shape could read a different number. The estimate is a heuristic, not a GS1 verification.
 
 Exports are SVG and PDF at the exact printed size, PNG at 150, 300 or 600 dpi, a spec-sheet PDF, and a ZIP of up to 500 barcodes from a list or CSV. A share link holds the whole design.
 
@@ -20,18 +20,17 @@ There is a `/barcode-tattoo` page that opens in Art mode. Every shape has its ow
 
 Fonts are self-hosted in `public/fonts` under the OFL.
 
-`public/_headers` adds a Content-Security-Policy and a Permissions-Policy next to the existing security headers.
+`public/_headers` adds a Content-Security-Policy and a Permissions-Policy next to the existing security headers. On 2026-10-21 the live site served them, and the full flow, the decode check, the fonts and the AI generator's call to api.anthropic.com all worked under that policy in Chrome.
 
-On 2026-10-21, `pnpm test` passed 153 tests in 17 files, `pnpm typecheck` and `pnpm lint` passed, and `pnpm build` produced the static export.
+On 2026-10-21, `pnpm test` passed 164 tests in 18 files, `pnpm typecheck` and `pnpm lint` passed, and `pnpm build` produced the static export on Next.js 15.5.
 
 ## Not yet verified
 
 - No exported barcode has been scanned with a real scanner or phone app. This matters most in Art mode, where the bars are shorter than the GS1 minimum.
 - The in-browser decode check reads the rendered pixels. It has not been compared with a real scanner.
-- The Content-Security-Policy has not been checked in a browser on Cloudflare Pages. Local servers do not apply `_headers`.
-- The `#` comment lines added to `public/_headers` are not checked against Cloudflare's parser.
+- The phone-read check has not been compared with real phone scanner apps.
 - Social previews (Open Graph and Twitter cards) have not been checked with the platforms' validators.
-- The mobile layout has not been checked on real phones.
+- The mobile layout was checked in a narrow desktop window at 360 and 390 px, not on real phones.
 - The shape credits in `THIRD_PARTY_NOTICES.md` have not been checked against the upstream sources. The Phosphor version number there is not checked against the copied paths.
 
 ## Next

@@ -81,16 +81,24 @@ export function useDesignRender(design: Design, enabled: boolean): Rendered {
       setRendered({ normalized, shapeId: shape, composed, plain, score, decode: "checking", otherReads: [], error: "" });
 
       let decode: DecodeState;
-      let otherReads: string[] = [];
       try {
         decode = (await decodeComposed(composed, format)) === normalized ? "ok" : "failed";
-        // Only shapes cut bars into partial lines; a plain barcode can't hide another code.
-        if (shape !== NO_SHAPE.id) otherReads = await phoneOtherReads(composed, format, normalized);
       } catch (err) {
         console.error("Decode error:", err);
         decode = "unavailable";
       }
-      if (!cancelled) setRendered((prev) => ({ ...prev, decode, otherReads }));
+      if (cancelled) return;
+      setRendered((prev) => ({ ...prev, decode }));
+
+      // Only a shape cuts bars into partial lines, and only a barcode that decodes is worth
+      // checking. A phone-read error must never hide or change the decode result.
+      if (decode !== "ok" || shape === NO_SHAPE.id) return;
+      try {
+        const otherReads = await phoneOtherReads(composed, format, normalized);
+        if (!cancelled) setRendered((prev) => ({ ...prev, otherReads }));
+      } catch (err) {
+        console.error("Phone-read check error:", err);
+      }
     }, DEBOUNCE_MS);
 
     return () => {
