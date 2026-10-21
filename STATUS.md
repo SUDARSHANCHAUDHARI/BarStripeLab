@@ -4,7 +4,7 @@ Last updated: 2026-10-21
 
 ## Where it is
 
-The live site at https://barstripelab.pages.dev is built by Cloudflare Pages from `main`. The Cloudflare setting is in the dashboard, so it is not checked from this repo.
+The live site at https://barstripelab.sudarshantechlabs.com (also served at barstripelab.pages.dev) is built by Cloudflare Pages from `main`. The Cloudflare setting is in the dashboard, so it is not checked from this repo.
 
 The redesign is on branch `feat/real-styles-ai-shortcuts`, 34 commits ahead of `main`. The home page is a four-step flow. It takes a number, asks where the barcode will be scanned, lets you pick one of 46 shapes, and shows the result on a product panel: a coffee bag, a can, a snack box or a swing tag.
 

@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - A page per shape at `/shape/<id>`, and shareable links that encode the full design.
 - Low-contrast warning and direct SVG-to-PNG export.
 - AI style generator using `claude-opus-5-5` with the visitor's own Anthropic key, sent only to api.anthropic.com.
-- Production metadata for https://barstripelab.pages.dev: canonical URLs, Open Graph and Twitter cards, and a 1200x630 `og-image.png` drawn by the app's own renderer.
+- Production metadata for https://barstripelab.sudarshantechlabs.com: canonical URLs, Open Graph and Twitter cards, and a 1200x630 `og-image.png` drawn by the app's own renderer.
 - Generated `sitemap.xml` (home and every shape page) and `robots.txt`.
 - Content-Security-Policy and Permissions-Policy in `public/_headers`.
 - Four-step flow: number (live check-digit validation and format detection), where it will be scanned, shape (46 shapes), and the result on a product panel (coffee bag, can, box or swing tag).
