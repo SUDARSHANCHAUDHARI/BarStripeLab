@@ -73,7 +73,7 @@ The shape artwork comes from [Phosphor Icons](https://phosphoricons.com) (MIT) a
 
 ## Development
 
-Requires Node 20.19.6 (see `.nvmrc`) and pnpm.
+Requires Node 24.22.0 (see `.nvmrc`) and pnpm.
 
 ```bash
 pnpm install
@@ -94,7 +94,7 @@ The site is a Next.js static export (`output: "export"`). Cloudflare Pages build
 
 - Build command: `pnpm build`
 - Build output directory: `out`
-- Node version: `20.19.6`
+- Node version: `24.22.0` (from `.nvmrc`)
 
 The Cloudflare Pages settings are in the Cloudflare dashboard, not in this repo.
 
