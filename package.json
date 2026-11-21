@@ -14,7 +14,7 @@
     "@anthropic-ai/sdk": "0.135.0",
     "@zxing/library": "0.23.0",
     "bwip-js": "^4.11.4",
-    "next": "15.5.28",
+    "next": "15.5.29",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
@@ -25,11 +25,11 @@
     "@types/react-dom": "19.3.0",
     "autoprefixer": "^10.6.1",
     "eslint": "^8.57.1",
-    "eslint-config-next": "15.5.28",
-    "postcss": "^8.5.30",
+    "eslint-config-next": "15.5.29",
+    "postcss": "^8.5.33",
     "tailwindcss": "^3.4.19",
     "typescript": "^5.9.3",
-    "vite": "7.3.7",
+    "vite": "7.3.8",
     "vitest": "4.1.12"
   },
   "pnpm": {
@@ -39,7 +39,7 @@
       "js-yaml@4": "4.3.2",
       "minimatch@3": "4.2.6",
       "minimatch@9": "9.0.9",
-      "postcss@<8.5.23": "8.5.30",
+      "postcss@<8.5.23": "8.5.33",
       "postcss-selector-parser@6": "7.1.6"
     }
   },
